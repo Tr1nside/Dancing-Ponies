@@ -1,0 +1,62 @@
+:root {
+  font-family: Inter, system-ui, sans-serif;
+  color: #111;
+  background: #f4f4f5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button {
+  font: inherit;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 24px;
+  display: grid;
+  place-items: center;
+}
+
+.card {
+  width: min(100%, 420px);
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.badge {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #e6f4ff;
+  color: #1677ff;
+  font-size: 14px;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+p {
+  margin: 0 0 20px;
+  color: #555;
+}
+
+.button {
+  border: 0;
+  border-radius: 14px;
+  padding: 12px 16px;
+  background: #2aabee;
+  color: white;
+  cursor: pointer;
+}
