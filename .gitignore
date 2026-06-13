@@ -213,3 +213,4 @@ temp/
 *.csv
 *.lst
 
+*.db

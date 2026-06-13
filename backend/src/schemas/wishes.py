@@ -1,0 +1,21 @@
+from pydantic import BaseModel
+
+
+class WishCreate(BaseModel):
+    title: str
+    wishlist_id: int
+    description: str | None = None
+    url: str | None = None
+    price: int | None = None
+
+
+class WishResponse(BaseModel):
+    id: int
+    title: str
+    wishlist_id: int
+    description: str | None
+    url: str | None
+    price: int | None
+    is_complete: bool
+
+    model_config = {"from_attributes": True}
