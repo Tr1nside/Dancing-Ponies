@@ -27,15 +27,36 @@ async def get_wishlists(
 
 
 @router.post("/", response_model=WishListResponse)
-async def create_wishlists(data: WishListCreate, db: Session = Depends(get_db)):
+async def create_wishlists(
+    data: WishListCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
     wishlist = WishList(
         title=data.title,
         emoji=data.emoji,
-        owner_id=data.owner_id,
+        owner_id=current_user["id"],
     )
     db.add(wishlist)
     db.commit()
     db.refresh(wishlist)
+    return wishlist
+
+
+@router.get("/{wishlist_id}", response_model=WishListResponse)
+async def get_wishlist(
+    wishlist_id: int,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),
+) -> WishList:
+    wishlist = db.query(WishList).filter(WishList.id == wishlist_id).first()
+    if wishlist is None:
+        raise HTTPException(status_code=404, detail="WishList not found")
+    if wishlist.owner_id != user["id"] and user["id"] not in [
+        m.id for m in wishlist.members
+    ]:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
     return wishlist
 
 
@@ -78,7 +99,7 @@ async def create_invite(wishlist_id: int, db: Session = Depends(get_db)) -> Invi
     return invite
 
 
-@router.get("/{wishlist_id}/wishes")
+@router.get("/{wishlist_id}/wishes", response_model=list[WishResponse])
 async def get_wishes(wishlist_id: int, db: Session = Depends(get_db)) -> list:
     wishes = db.query(Wish).filter(Wish.wishlist_id == wishlist_id).all()
     return wishes

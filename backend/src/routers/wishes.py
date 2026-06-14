@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.database import get_db
 from src.models import Wish
-from src.schemas.wishes import WishResponse
+from src.schemas.wishes import WishResponse, CompleteWishRequest
 
 router = APIRouter(prefix="/wishes", tags=["wishes"])
 
@@ -26,10 +26,12 @@ async def delete_wish(wish_id: int, db: Session = Depends(get_db)) -> dict:
 
 
 @router.patch("/{wish_id}/complete")
-async def complete_wish(wish_id: int, db: Session = Depends(get_db)) -> dict:
+async def complete_wish(
+    wish_id: int, data: CompleteWishRequest, db: Session = Depends(get_db)
+) -> dict:
     wish = db.query(Wish).filter(Wish.id == wish_id).first()
     if not wish:
         raise HTTPException(status_code=404, detail="Wish not found")
-    wish.is_complete = True
+    wish.is_completed = data.is_completed
     db.commit()
     return {"completed_id": wish.id}

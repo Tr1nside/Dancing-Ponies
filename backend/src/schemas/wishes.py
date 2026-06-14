@@ -1,6 +1,10 @@
 from pydantic import BaseModel
 
 
+class CompleteWishRequest(BaseModel):
+    is_completed: bool
+
+
 class WishCreate(BaseModel):
     title: str
     wishlist_id: int
@@ -16,6 +20,6 @@ class WishResponse(BaseModel):
     description: str | None
     url: str | None
     price: int | None
-    is_complete: bool
+    is_completed: bool
 
     model_config = {"from_attributes": True}

@@ -45,7 +45,7 @@ class Wish(Base):
     description: Mapped[str | None] = mapped_column(String, nullable=True)
     url: Mapped[str | None] = mapped_column(String, nullable=True)
     price: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    is_complete: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_completed: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
 class Invite(Base):

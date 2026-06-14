@@ -12,4 +12,9 @@ export interface Wish {
     url?: string;
     price?: number;
     wishlist_id: number;
+    is_completed: boolean;
+}
+
+export interface handleWishCompleteRequest {
+    is_completed: boolean;
 }
