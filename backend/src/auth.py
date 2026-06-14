@@ -11,7 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 async def get_current_user(x_init_data: str = Header(...)) -> dict:
-
     print(f"DEBUG ENV: {os.getenv('DEBUG')!r}")
     print(f"INIT DATA: {x_init_data!r}")
     logging.error(f"DEBUG ENV: {os.getenv('DEBUG')!r}")
