@@ -10,5 +10,5 @@ export const getWish = (wish_id: number) =>
 export const createWish = (data: Omit<Wish, "id">) =>
     client.post(`/wishlists/${data.wishlist_id}/wishes`, data).then((r) => r.data);
 
-export const deleteWishlist = (wish_id: number) =>
+export const deleteWish = (wish_id: number) =>
     client.delete(`/wishes/${wish_id}`).then((r) => r.data);
