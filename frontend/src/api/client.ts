@@ -5,8 +5,6 @@ const initDataRaw =
     import.meta.env.VITE_DEV_INIT_DATA ||
     "";
 
-console.log("Penis")
-console.log(import.meta.env.VITE_DEV_INIT_DATA)
 const client = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
     headers: {
