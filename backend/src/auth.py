@@ -7,6 +7,11 @@ import os
 
 
 async def get_current_user(x_init_data: str = Header(...)) -> dict:
+
+    # DEV MODE - если передали "test123", возвращаем фейкового юзера
+    if x_init_data == "test123" and os.getenv("DEBUG") == "true":
+        return {"id": 123456789, "first_name": "Dev", "username": "devuser"}
+
     bot_token = os.getenv("BOT_TOKEN")
     if not bot_token:
         raise HTTPException(status_code=401, detail="Bot token not found")
