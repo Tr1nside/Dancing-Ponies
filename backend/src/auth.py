@@ -1,16 +1,26 @@
 import json
 import hmac
 import hashlib
+import logging
 from urllib.parse import parse_qsl
 from fastapi import Header, HTTPException
 import os
 
 
+logger = logging.getLogger(__name__)
+
+
 async def get_current_user(x_init_data: str = Header(...)) -> dict:
+
+    print(f"DEBUG ENV: {os.getenv('DEBUG')!r}")
+    print(f"INIT DATA: {x_init_data!r}")
+    logging.error(f"DEBUG ENV: {os.getenv('DEBUG')!r}")
+    logging.error(f"INIT DATA: {x_init_data!r}")
 
     # DEV MODE - если передали "test123", возвращаем фейкового юзера
     if x_init_data == "test123" and os.getenv("DEBUG") == "true":
-        print("Login Dev User")
+        logging.error(f"DEBUG ENV: {os.getenv('DEBUG')!r}")
+        logging.error(f"INIT DATA: {x_init_data!r}")
         return {"id": 123456789, "first_name": "Dev", "username": "devuser"}
 
     bot_token = os.getenv("BOT_TOKEN")
