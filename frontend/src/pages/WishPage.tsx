@@ -9,6 +9,12 @@ import {
 import { DropdownMenu, type MenuItem } from "../components/DropdownMenu";
 import type { Wish } from "../types";
 
+function normalizeUrl(url: string): string {
+	if (!url) return "";
+	if (url.startsWith("http://") || url.startsWith("https://")) return url;
+	return `https://${url}`;
+}
+
 function EditableField({
 	isEditing,
 	value,
@@ -16,15 +22,31 @@ function EditableField({
 	type = "text",
 	onChange,
 	placeholder = "",
+	multiline = false,
 }: {
 	isEditing: boolean;
 	value: string | number;
 	display: React.ReactNode;
-	placeholder: string;
 	type?: string;
-	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+	onChange: (
+		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+	) => void;
+	placeholder: string;
+	multiline?: boolean;
 }) {
 	if (!isEditing) return <>{display}</>;
+
+	if (multiline) {
+		return (
+			<textarea
+				value={value}
+				onChange={onChange}
+				placeholder={placeholder}
+				id="description-input"
+			/>
+		);
+	}
+
 	return (
 		<input
 			value={value}
@@ -172,13 +194,17 @@ export default function WishesPage() {
 					value={editData.url}
 					display={
 						wish.url && (
-							<a href={wish.url} target="_blank" rel="noopener noreferrer">
+							<a
+								href={normalizeUrl(wish.url)}
+								target="_blank"
+								rel="noopener noreferrer"
+							>
 								Ссылка
 							</a>
 						)
 					}
 					type="url"
-					onChange={(e) => updateField("url", e.target.value)}
+					onChange={(e) => updateField("url", normalizeUrl(e.target.value))}
 					placeholder="Ссылка"
 				/>
 				<EditableField
@@ -196,6 +222,7 @@ export default function WishesPage() {
 					type="text"
 					onChange={(e) => updateField("description", e.target.value)}
 					placeholder="Описание"
+					multiline={true}
 				/>
 
 				<button onClick={handleComplete} type="button">
