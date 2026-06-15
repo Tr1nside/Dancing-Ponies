@@ -13,11 +13,9 @@ export default function WishlistsPage() {
 	const handleCreate = async () => {
 		if (!title.trim()) return;
 
-		if (emoji === "") {
-			setEmoji("☺️");
-		}
+		const emojiToSend = emoji || "☺️";
 		try {
-			const newWishlist = await createWishlist({ title, emoji });
+			const newWishlist = await createWishlist({ title, emoji: emojiToSend });
 			setWishlists([...wishlists, newWishlist]); // добавляем в список без перезагрузки
 			setTitle(""); // очищаем форму
 			setEmoji("");
