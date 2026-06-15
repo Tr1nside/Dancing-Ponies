@@ -54,6 +54,7 @@ header h1 {
 
 .back-button {
 	background: none;
+	background-color: rgba(0, 0, 0, 0);
 	border: none;
 	color: var(--tg-theme-link-color, #2481cc);
 	font-size: 16px;
