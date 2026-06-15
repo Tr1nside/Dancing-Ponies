@@ -60,6 +60,9 @@ header h1 {
 	cursor: pointer;
 	padding: 4px 8px;
 	border-radius: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 /* ---- Wish body (страница одного желания) ---- */
@@ -99,6 +102,9 @@ button {
 	border-radius: 10px;
 	padding: 10px 16px;
 	font-size: 15px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .btn-primary {
@@ -320,4 +326,8 @@ input:focus {
 	border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
 	background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
 	color: var(--tg-theme-text-color, #000);
+}
+
+.icon-button {
+	color: var(--tg-theme-text-color, #000000); /* ← currentColor возьмёт это */
 }

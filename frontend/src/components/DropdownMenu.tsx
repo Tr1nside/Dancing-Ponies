@@ -26,7 +26,13 @@ export function DropdownMenu({ items }: { items: MenuItem[] }) {
 	return (
 		<div className="dropdown" ref={ref}>
 			<button type="button" onClick={() => setOpen(!open)}>
-				<img src="/other_icon.svg" alt="⋯" width={24} height={24} />
+				<img
+					src="/other_icon.svg"
+					className="icon-button"
+					alt="⋯"
+					width={24}
+					height={24}
+				/>
 			</button>
 			{open && (
 				<div className="dropdown-menu">
