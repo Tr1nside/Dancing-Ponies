@@ -41,6 +41,7 @@ export default function WishlistsPage() {
 					type="text"
 					value={emoji}
 					id="emoji-input"
+					placeholder="😊"
 					maxLength={2}
 					onChange={(e) => {
 						setEmoji(e.target.value);
@@ -50,6 +51,7 @@ export default function WishlistsPage() {
 					type="text"
 					value={title}
 					id="title-input"
+					placeholder="Название"
 					onChange={(e) => {
 						setTitle(e.target.value);
 					}}

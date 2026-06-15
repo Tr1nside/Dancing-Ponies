@@ -260,6 +260,12 @@ input:focus {
 	flex-direction: column;
 	gap: 0.5rem;
 	margin-bottom: 1.25rem;
+	height: 150px;
+}
+
+.new-wish-form input {
+	box-sizing: border-box;
+	height: 44px;
 }
 
 /* Цена и ссылка — в одну строку */

@@ -15,15 +15,24 @@ function EditableField({
 	display,
 	type = "text",
 	onChange,
+	placeholder = "",
 }: {
 	isEditing: boolean;
 	value: string | number;
 	display: React.ReactNode;
+	placeholder: string;
 	type?: string;
 	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
 	if (!isEditing) return <>{display}</>;
-	return <input value={value} type={type} onChange={onChange} />;
+	return (
+		<input
+			value={value}
+			type={type}
+			onChange={onChange}
+			placeholder={placeholder}
+		/>
+	);
 }
 
 export default function WishesPage() {
@@ -143,6 +152,7 @@ export default function WishesPage() {
 					display={<h1>{wish.title}</h1>}
 					type="text"
 					onChange={(e) => updateField("title", e.target.value)}
+					placeholder="Название"
 				/>
 
 				<DropdownMenu
@@ -169,6 +179,7 @@ export default function WishesPage() {
 					}
 					type="url"
 					onChange={(e) => updateField("url", e.target.value)}
+					placeholder="Ссылка"
 				/>
 				<EditableField
 					isEditing={isEditing}
@@ -176,6 +187,7 @@ export default function WishesPage() {
 					display={wish.price && <p>{wish.price} ₽</p>}
 					type="number"
 					onChange={(e) => updateField("price", Number(e.target.value))}
+					placeholder="Цена"
 				/>
 				<EditableField
 					isEditing={isEditing}
@@ -183,6 +195,7 @@ export default function WishesPage() {
 					display={wish.description && <p>{wish.description}</p>}
 					type="text"
 					onChange={(e) => updateField("description", e.target.value)}
+					placeholder="Описание"
 				/>
 
 				<button onClick={handleComplete} type="button">
