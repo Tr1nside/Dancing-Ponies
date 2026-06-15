@@ -25,17 +25,22 @@ export function DropdownMenu({ items }: { items: MenuItem[] }) {
 
 	return (
 		<div className="dropdown" ref={ref}>
-			<button type="button" onClick={() => setOpen(!open)}>
+			<button
+				type="button"
+				onClick={() => setOpen(!open)}
+				className="dropdown-toggle"
+			>
 				<svg
 					width="24"
 					height="24"
 					viewBox="0 0 24 24"
 					fill="currentColor"
 					aria-label="Menu"
+					className="icon-button"
 				>
-					<circle cx="5" cy="12" r="2" />
+					<circle cx="12" cy="5" r="2" />
 					<circle cx="12" cy="12" r="2" />
-					<circle cx="19" cy="12" r="2" />
+					<circle cx="12" cy="19" r="2" />
 				</svg>
 			</button>
 			{open && (

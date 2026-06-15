@@ -328,6 +328,16 @@ input:focus {
 }
 
 .icon-button {
-	/* color: var(--tg-theme-text-color, #000000); */
-	color: #ff3b30;
+	color: var(--tg-theme-text-color, #000000);
+}
+.dropdown-toggle {
+	background: none;
+	border: none;
+	padding: 0;
+	width: 44px;
+	height: 44px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--tg-theme-text-color, #000000);
 }

@@ -7,6 +7,7 @@ export default function BackButton({ onClick }: { onClick: () => void }) {
 				viewBox="0 0 24 24"
 				fill="none"
 				aria-label="Back"
+				className="icon-button"
 			>
 				<path
 					d="M15 18L9 12L15 6"
