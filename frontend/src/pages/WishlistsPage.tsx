@@ -34,14 +34,14 @@ export default function WishlistsPage() {
 	if (error) return <div>Ошибка: {error}</div>;
 
 	return (
-		<div>
+		<div className="page-div">
 			<h1>Мои списки</h1>
-			<div className="new-wishlist-dib">
+			<div className="new-wishlist-input">
 				<input
 					type="text"
 					value={emoji}
 					id="emoji-input"
-					maxLength={1}
+					maxLength={2}
 					onChange={(e) => {
 						setEmoji(e.target.value);
 					}}

@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createWish, getWishes, handleWishComplete } from "../api/wishes";
 import { deleteWishlist, getWishlist } from "../api/wishlists";
+import { DropdownMenu } from "../components/DropdownMenu";
 import WishCard from "../components/WishCard";
 import type { Wish, Wishlist } from "../types";
 
 export default function WishesPage() {
 	const navigate = useNavigate();
 	const { wishlistId } = useParams();
-	const [menuOpen, setMenuOpen] = useState(false);
 	const [wishes, setWishes] = useState<Wish[]>([]);
 	const [wishlist, setWishlist] = useState<Wishlist>();
 	const [loading, setLoading] = useState(true);
@@ -102,7 +102,7 @@ export default function WishesPage() {
 	if (error) return <div>Ошибка: {error}</div>;
 
 	return (
-		<div>
+		<div className="page-div">
 			<header className="wishlist-header" style={{ position: "relative" }}>
 				<button
 					type="button"
@@ -114,56 +114,35 @@ export default function WishesPage() {
 				<h1>
 					{wishlist?.emoji} {wishlist?.title}
 				</h1>
-				<button type="button" onClick={() => setMenuOpen(!menuOpen)}>
-					⋯
-				</button>
-
-				{menuOpen && (
-					<div
-						style={{
-							position: "absolute",
-							background: "white",
-							border: "1px solid #ccc",
-						}}
-					>
-						<button
-							type="button"
-							onClick={() => {
-								handleDeleteList();
-								setMenuOpen(false);
-							}}
-						>
-							Удалить
-						</button>
-					</div>
-				)}
+				<DropdownMenu
+					items={[{ label: "Удалить", onClick: handleDeleteList }]}
+				/>
 			</header>
-			<div className="new-wish-dib">
+			<div className="new-wish-form">
 				<input
 					type="text"
 					value={title}
 					id="title-input"
-					onChange={(e) => {
-						setTitle(e.target.value);
-					}}
+					placeholder="Название"
+					onChange={(e) => setTitle(e.target.value)}
 				/>
-				<input
-					type="number"
-					value={price}
-					id="price-input"
-					onChange={(e) => {
-						setPrice(Number(e.target.value));
-					}}
-				/>
-				<input
-					type="text"
-					value={url}
-					id="url-input"
-					onChange={(e) => {
-						setUrl(e.target.value);
-					}}
-				/>
-				<input type="submit" value="Создать" onClick={handleCreate} />
+				<div className="price-url-row">
+					<input
+						type="number"
+						value={price || ""}
+						id="price-input"
+						placeholder="Цена"
+						onChange={(e) => setPrice(Number(e.target.value))}
+					/>
+					<input
+						type="text"
+						value={url}
+						id="url-input"
+						placeholder="Ссылка"
+						onChange={(e) => setUrl(e.target.value)}
+					/>
+				</div>
+				<input type="button" onClick={handleCreate} value="Создать" />
 			</div>
 
 			{wishes.map((w) => (

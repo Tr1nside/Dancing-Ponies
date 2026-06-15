@@ -128,7 +128,7 @@ export default function WishesPage() {
 	if (wish == null) return <div>Wish not find</div>;
 
 	return (
-		<div>
+		<div className="page-div">
 			<header className="wish-header">
 				<button
 					type="button"

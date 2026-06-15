@@ -1,14 +1,296 @@
+/* index.css */
+
+/* Сброс */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	font-size: 16px;
+	/* Telegram даёт свои переменные цветов */
+	background-color: var(--tg-theme-bg-color, #ffffff);
+	color: var(--tg-theme-text-color, #000000);
+	min-height: 100dvh;
+}
+
+/* ---- Общий layout ---- */
+
+.page {
+	display: flex;
+	flex-direction: column;
+	min-height: 100dvh;
+}
+
+/* ---- Header ---- */
+
 header {
 	display: flex;
 	align-items: center;
 	gap: 8px;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+	position: sticky;
+	top: 0;
+	background-color: var(--tg-theme-bg-color, #ffffff);
 }
 
-.wishcard-div {
-	display: flex;
+header h1 {
+	flex: 1;
+	font-size: 18px;
+	font-weight: 600;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
+
+.back-button {
+	background: none;
+	border: none;
+	color: var(--tg-theme-link-color, #2481cc);
+	font-size: 16px;
+	cursor: pointer;
+	padding: 4px 8px;
+	border-radius: 8px;
+}
+
+/* ---- Wish body (страница одного желания) ---- */
 
 .wish-body {
 	display: flex;
 	flex-direction: column;
+	gap: 12px;
+	padding: 16px;
+}
+
+.wish-body a {
+	color: var(--tg-theme-link-color, #2481cc);
+}
+
+/* ---- WishCard ---- */
+
+.wishcard-div {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+	cursor: pointer;
+}
+
+.wishcard-div.completed {
+	opacity: 0.5;
+	text-decoration: line-through;
+}
+
+/* ---- Кнопки ---- */
+
+button {
+	cursor: pointer;
+	border: none;
+	border-radius: 10px;
+	padding: 10px 16px;
+	font-size: 15px;
+}
+
+.btn-primary {
+	background-color: var(--tg-theme-button-color, #2481cc);
+	color: var(--tg-theme-button-text-color, #ffffff);
+	width: 100%;
+}
+
+.btn-secondary {
+	background-color: transparent;
+	color: var(--tg-theme-link-color, #2481cc);
+}
+
+.btn-danger {
+	background-color: transparent;
+	color: #ff3b30;
+}
+
+/* ---- Инпуты ---- */
+
+input {
+	padding: 10px 12px;
+	border-radius: 10px;
+	border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+	background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
+	color: var(--tg-theme-text-color, #000000);
+	font-size: 15px;
+}
+
+input:focus {
+	outline: none;
+	border-color: var(--tg-theme-button-color, #2481cc);
+}
+
+/* ---- Dropdown ---- */
+
+.dropdown {
+	position: relative;
+}
+
+.dropdown-menu {
+	position: absolute;
+	right: 0;
+	top: 100%;
+	background-color: var(--tg-theme-bg-color, #ffffff);
+	border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+	border-radius: 10px;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+	min-width: 150px;
+	z-index: 100;
+	overflow: hidden;
+}
+
+.dropdown-menu button {
+	display: block;
+	width: 100%;
+	text-align: left;
+	border-radius: 0;
+	padding: 12px 16px;
+	background: none;
+	color: var(--tg-theme-text-color, #000000);
+}
+
+.dropdown-menu button:hover {
+	background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
+}
+
+/* --- WishlistsPage --- */
+.page-div {
+	padding: 1rem;
+	max-width: 600px;
+	margin: 0 auto; /* центрируем на широких экранах */
+}
+
+.wishlists-div h1 {
+	font-size: 1.5rem;
+	margin-bottom: 1rem;
+}
+
+/* Форма создания */
+.new-wishlist-input {
+	display: flex;
+	gap: 0.5rem;
+	width: 100%;
+	margin-bottom: 1.25rem;
+}
+
+/* Эмодзи — фиксированный, не растёт и не сжимается */
+#emoji-input {
+	flex: 0 0 44px; /* grow=0, shrink=0, basis=44px */
+	width: 44px;
+	height: 44px;
+	min-width: 0; /* ← убирает дефолтный min-width у input */
+	text-align: center;
+	font-size: 1.25rem;
+	border-radius: 10px;
+	border: 1px solid #ccc;
+	padding: 0;
+}
+
+/* Title — занимает всё свободное место */
+#title-input {
+	flex: 1 1 0; /* ← flex-basis: 0 вместо auto, чтобы точно растягивался */
+	min-width: 0; /* ← главный фикс, без этого input не сжимается */
+	height: 44px;
+	font-size: 1rem;
+	border-radius: 10px;
+	border: 1px solid #ccc;
+	padding: 0 0.75rem;
+}
+
+/* Кнопка — только по контенту */
+.new-wishlist-input input[type="submit"] {
+	flex: 0 0 auto; /* ← не растёт, размер только по тексту */
+	height: 44px;
+	padding: 0 1rem;
+	font-size: 0.875rem;
+	font-weight: 600;
+	border: none;
+	border-radius: 10px;
+	background-color: #2563eb;
+	color: white;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.new-wishlist-input input[type="submit"]:active {
+	background-color: #1d4ed8;
+}
+
+/* Карточки вишлистов */
+.wishlist-div {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.75rem 1rem;
+	margin-bottom: 0.5rem;
+	border-radius: 12px;
+	border: 1px solid #e5e7eb;
+	font-size: 1rem;
+	text-decoration: none;
+	color: inherit;
+	transition: background 0.15s;
+}
+
+.wishlist-div:active {
+	background-color: #f3f4f6;
+}
+
+/* На широких экранах чуть больше отступы */
+@media (min-width: 480px) {
+	.wishlists-div {
+		padding: 1.5rem;
+	}
+
+	.new-wishlist-input input[type="submit"] {
+		min-width: 100px;
+	}
+}
+
+.new-wish-form {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	margin-bottom: 1.25rem;
+}
+
+/* Цена и ссылка — в одну строку */
+.price-url-row {
+	display: flex;
+	gap: 0.5rem;
+}
+
+#price-input {
+	flex: 0 0 100px; /* фиксированная ширина */
+	min-width: 0;
+}
+
+#url-input {
+	flex: 1; /* занимает остаток */
+	min-width: 0;
+}
+
+/* Кнопка на всю ширину */
+.new-wish-form input[type="button"] {
+	width: 100%;
+	height: 44px;
+	font-size: 0.875rem;
+	font-weight: 600;
+	border: none;
+	border-radius: 10px;
+	background-color: var(--tg-theme-button-color, #2563eb);
+	color: var(--tg-theme-button-text-color, #ffffff);
+	cursor: pointer;
+}
+
+.new-wish-form input[type="button"]:active {
+	opacity: 0.8;
 }
