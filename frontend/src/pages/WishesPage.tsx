@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createWish, getWishes, handleWishComplete } from "../api/wishes";
 import { deleteWishlist, getWishlist } from "../api/wishlists";
+import BackButton from "../components/BackButton";
 import { DropdownMenu } from "../components/DropdownMenu";
 import WishCard from "../components/WishCard";
 import type { Wish, Wishlist } from "../types";
@@ -104,13 +105,7 @@ export default function WishesPage() {
 	return (
 		<div className="page-div">
 			<header className="wishlist-header" style={{ position: "relative" }}>
-				<button
-					type="button"
-					className="back-button"
-					onClick={() => navigate("/")}
-				>
-					back
-				</button>
+				<BackButton onClick={() => navigate("/")} />
 				<h1>
 					{wishlist?.emoji} {wishlist?.title}
 				</h1>

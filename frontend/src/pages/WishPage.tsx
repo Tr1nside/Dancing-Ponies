@@ -6,6 +6,7 @@ import {
 	handleWishComplete,
 	updateWish,
 } from "../api/wishes";
+import BackButton from "../components/BackButton";
 import { DropdownMenu, type MenuItem } from "../components/DropdownMenu";
 import type { Wish } from "../types";
 
@@ -161,13 +162,9 @@ export default function WishesPage() {
 	return (
 		<div className="page-div">
 			<header className="wish-header">
-				<button
-					type="button"
-					className="back-button"
+				<BackButton
 					onClick={() => navigate(`/wishlists/${wish?.wishlist_id}`)}
-				>
-					back
-				</button>
+				/>
 				<EditableField
 					isEditing={isEditing}
 					value={editData.title}
