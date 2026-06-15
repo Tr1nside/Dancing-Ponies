@@ -15,6 +15,7 @@
 	"dependencies": {
 		"@telegram-apps/sdk": "^2.11.3",
 		"axios": "^1.17.0",
+		"eruda": "^3.4.3",
 		"react": "^19.2.6",
 		"react-dom": "^19.2.6",
 		"react-router-dom": "^7.17.0"
