@@ -1,56 +1,66 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { createWishlist, getWishlists } from "../api/wishlists";
 import type { Wishlist } from "../types";
-import { getWishlists, createWishlist } from "../api/wishlists";
 
 export default function WishlistsPage() {
-    const navigate = useNavigate();
-    const [wishlists, setWishlists] = useState<Wishlist[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [title, setTitle] = useState<string>("")
-    const [emoji, setEmoji] = useState<string>("")
+	const [wishlists, setWishlists] = useState<Wishlist[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	const [title, setTitle] = useState<string>("");
+	const [emoji, setEmoji] = useState<string>("");
 
-    const handleCreate = async () => {
-        if (!title.trim()) return;
-        try {
-            const newWishlist = await createWishlist({ title, emoji });
-            setWishlists([...wishlists, newWishlist]); // добавляем в список без перезагрузки
-            setTitle("");  // очищаем форму
-            setEmoji("");
-        } catch (e: any) {
-            setError(e.message);
-        }
-    };
+	const handleCreate = async () => {
+		if (!title.trim()) return;
+		try {
+			const newWishlist = await createWishlist({ title, emoji });
+			setWishlists([...wishlists, newWishlist]); // добавляем в список без перезагрузки
+			setTitle(""); // очищаем форму
+			setEmoji("");
+		} catch (e) {
+			setError(e instanceof Error ? e.message : "Error");
+		}
+	};
 
+	useEffect(() => {
+		getWishlists()
+			.then(setWishlists)
+			.catch((e) => setError(e.message))
+			.finally(() => setLoading(false));
+	}, []);
 
+	if (loading) return <div>Загрузка...</div>;
 
-    useEffect(() => {
-        getWishlists()
-            .then(setWishlists)
-            .catch((e) => setError(e.message))
-            .finally(() => setLoading(false));
-    }, []);
+	if (error) return <div>Ошибка: {error}</div>;
 
-
-    if (loading) return <div>Загрузка...</div>;
-
-    if (error) return <div>Ошибка: {error}</div>;
-
-    return (
-        <div>
-            <h1>Мои списки</h1>
-            <div className="new-wishlist-dib">
-                <input type="text" value={emoji} id="emoji-input" onChange={(e) => { setEmoji(e.target.value) }} />
-                <input type="text" value={title} id="title-input" onChange={(e) => { setTitle(e.target.value) }} />
-                <input type="submit" value="Создать" onClick={handleCreate} />
-
-            </div>
-            {wishlists.map((w) => (
-                <div className="wishlist-div" key={w.id} onClick={() => navigate(`/wishlists/${w.id}`)}>
-                    {w.emoji} {w.title}
-                </div>
-            ))}
-        </div>
-    );
+	return (
+		<div>
+			<h1>Мои списки</h1>
+			<div className="new-wishlist-dib">
+				<input
+					type="text"
+					value={emoji}
+					id="emoji-input"
+					maxLength={1}
+					onChange={(e) => {
+						setEmoji(e.target.value);
+					}}
+				/>
+				<input
+					type="text"
+					value={title}
+					id="title-input"
+					onChange={(e) => {
+						setTitle(e.target.value);
+					}}
+				/>
+				<input type="submit" value="Создать" onClick={handleCreate} />
+			</div>
+			{wishlists.map((w) => (
+				<Link key={w.id} className="wishlist-div" to={`/wishlists/${w.id}`}>
+					{w.emoji} {w.title}
+				</Link>
+			))}
+		</div>
+	);
 }

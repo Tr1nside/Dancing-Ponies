@@ -23,3 +23,10 @@ class WishResponse(BaseModel):
     is_completed: bool
 
     model_config = {"from_attributes": True}
+
+
+class WishUpdate(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    price: float | None = None
+    url: str | None = None
