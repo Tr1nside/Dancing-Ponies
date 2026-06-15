@@ -27,12 +27,10 @@ async def get_current_user(x_init_data: str = Header(...)) -> dict:
 
 
 def validate_init_data(init_data: str, bot_token: str) -> dict:
-    print(f"DEBUG: init_data = '{init_data[:50]}'")
     if not init_data:
         raise ValueError("init_data is empty")
 
     pairs = dict(parse_qsl(init_data))
-    print(f"DEBUG: pairs keys = {list(pairs.keys())}")
 
     received_hash = pairs.pop("hash")
     data_check_string = "\n".join(f"{k}={v}" for k, v in sorted(pairs.items()))
