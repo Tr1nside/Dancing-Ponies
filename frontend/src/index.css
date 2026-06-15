@@ -18,6 +18,10 @@ body {
 	min-height: 100dvh;
 }
 
+p {
+	white-space: pre-wrap; /* сохраняет переносы строк */
+}
+
 /* ---- Общий layout ---- */
 
 .page {
