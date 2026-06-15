@@ -13,7 +13,6 @@ const client = axios.create({
 client.interceptors.request.use((config) => {
 	console.log("WebApp object:", window.Telegram?.WebApp);
 	console.log("initData:", window.Telegram?.WebApp?.initData);
-	console.log("initDataUnsafe:", window.Telegram?.WebApp?.initDataUnsafe);
 
 	const initData =
 		window.Telegram?.WebApp?.initData ||
