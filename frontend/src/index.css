@@ -54,16 +54,14 @@ header h1 {
 
 .back-button {
 	background: none;
-	background-color: rgba(0, 0, 0, 0);
 	border: none;
-	color: var(--tg-theme-link-color, #2481cc);
-	font-size: 16px;
+	padding: 0; /* ← убирает отступы вокруг иконки */
 	cursor: pointer;
-	padding: 4px 8px;
-	border-radius: 8px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	width: 44px;
+	height: 44px;
 }
 
 /* ---- Wish body (страница одного желания) ---- */
@@ -330,5 +328,6 @@ input:focus {
 }
 
 .icon-button {
-	color: var(--tg-theme-text-color, #000000); /* ← currentColor возьмёт это */
+	/* color: var(--tg-theme-text-color, #000000); */
+	color: #ff3b30;
 }
