@@ -11,11 +11,14 @@ const client = axios.create({
 });
 
 client.interceptors.request.use((config) => {
+	console.log("WebApp object:", window.Telegram?.WebApp);
+	console.log("initData:", window.Telegram?.WebApp?.initData);
+	console.log("initDataUnsafe:", window.Telegram?.WebApp?.initDataUnsafe);
+
 	const initData =
 		window.Telegram?.WebApp?.initData ||
 		import.meta.env.VITE_DEV_INIT_DATA ||
 		"";
-	console.log("Sending initData:", initData.substring(0, 30));
 	config.headers["x-init-data"] = initData;
 	return config;
 });
