@@ -38,6 +38,7 @@ async def create_wishlists(
         emoji=data.emoji,
         owner_id=current_user["id"],
     )
+    print(wishlist.owner_id)
     db.add(wishlist)
     db.commit()
     db.refresh(wishlist)

@@ -25,6 +25,7 @@ async def get_current_user(x_init_data: str = Header(...)) -> dict:
     else:
         try:
             user = validate_init_data(x_init_data, bot_token)
+            print(user["id"])
         except ValueError:
             raise HTTPException(status_code=401, detail="Unauthorized")
 
