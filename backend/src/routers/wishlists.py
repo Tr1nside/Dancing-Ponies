@@ -8,6 +8,7 @@ from src.schemas.wishlists import WishListCreate, WishListResponse
 from src.schemas.invites import InviteResponse
 from src.schemas.wishes import WishCreate, WishResponse
 import secrets
+from datetime import datetime, timezone, timedelta
 
 router = APIRouter(prefix="/wishlists", tags=["wishlists"])
 
@@ -61,10 +62,17 @@ async def get_wishlist(
 
 
 @router.delete("/{wishlist_id}", response_model=dict)
-async def delete_wishlist(wishlist_id: int, db: Session = Depends(get_db)) -> dict:
+async def delete_wishlist(
+    wishlist_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+) -> dict:
     wishlist = db.query(WishList).filter(WishList.id == wishlist_id).first()
     if wishlist is None:
         raise HTTPException(status_code=404, detail="WishList not found")
+
+    if current_user != wishlist.owner:
+        raise HTTPException(status_code=403, detail="No access")
 
     db.query(Wish).filter(Wish.wishlist_id == wishlist_id).delete()
 
@@ -75,11 +83,17 @@ async def delete_wishlist(wishlist_id: int, db: Session = Depends(get_db)) -> di
 
 @router.delete("/{wishlist_id}/members/{user_id}", response_model=dict)
 async def kick_member(
-    wishlist_id: int, user_id: int, db: Session = Depends(get_db)
+    wishlist_id: int,
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
 ) -> dict:
     wishlist = db.query(WishList).filter(WishList.id == wishlist_id).first()
     if wishlist is None:
         raise HTTPException(status_code=404, detail="WishList not found")
+
+    if current_user != wishlist.owner:
+        raise HTTPException(status_code=403, detail="No access")
 
     kicked_user = db.query(User).filter(User.id == user_id).first()
     if kicked_user is None or kicked_user not in wishlist.members:
@@ -92,9 +106,17 @@ async def kick_member(
 
 
 @router.post("/{wishlist_id}/invite", response_model=InviteResponse)
-async def create_invite(wishlist_id: int, db: Session = Depends(get_db)) -> Invite:
+async def create_invite(
+    wishlist_id: int,
+    db: Session = Depends(get_db),
+) -> Invite:
     token = secrets.token_urlsafe(16)
     invite = Invite(wishlist_id=wishlist_id, token=token)
+
+    three_months_ago = datetime.now(timezone.utc) - timedelta(days=90)
+    db.query(Invite).filter(Invite.created_at < three_months_ago).delete()
+    db.commit()
+
     db.add(invite)
     db.commit()
     db.refresh(invite)
@@ -102,7 +124,15 @@ async def create_invite(wishlist_id: int, db: Session = Depends(get_db)) -> Invi
 
 
 @router.get("/{wishlist_id}/wishes", response_model=list[WishResponse])
-async def get_wishes(wishlist_id: int, db: Session = Depends(get_db)) -> list:
+async def get_wishes(
+    wishlist_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+) -> list:
+    wishlist_owner = db.query(WishList).filter(WishList.id == wishlist_id).first()
+    if wishlist_owner is None or current_user != wishlist_owner:
+        raise HTTPException(status_code=403, detail="No access")
+
     wishes = db.query(Wish).filter(Wish.wishlist_id == wishlist_id).all()
     return wishes
 
