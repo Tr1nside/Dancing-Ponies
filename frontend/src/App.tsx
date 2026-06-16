@@ -1,5 +1,5 @@
 import { retrieveLaunchParams } from "@telegram-apps/sdk";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { BrowserRouter, Route, Routes, useNavigate } from "react-router-dom";
 import InvitePage from "./pages/InvitePage";
 import WishesPage from "./pages/WishesPage";
@@ -8,8 +8,12 @@ import WishPage from "./pages/WishPage";
 
 function Navigator() {
 	const navigate = useNavigate();
+	const handled = useRef(false);
 
 	useEffect(() => {
+		if (handled.current) return;
+		handled.current = true;
+
 		let startParam: string | undefined;
 		try {
 			startParam = retrieveLaunchParams().startParam;
@@ -18,7 +22,7 @@ function Navigator() {
 		}
 
 		if (startParam) {
-			navigate(`/invite/${startParam}`);
+			navigate(`/invite/${startParam}`, { replace: true });
 		}
 	}, [navigate]);
 
