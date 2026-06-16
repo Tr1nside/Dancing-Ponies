@@ -38,7 +38,6 @@ async def create_wishlists(
         emoji=data.emoji,
         owner_id=current_user["id"],
     )
-    print(wishlist.owner_id)
     db.add(wishlist)
     db.commit()
     db.refresh(wishlist)
@@ -54,8 +53,6 @@ async def get_wishlist(
     wishlist = db.query(WishList).filter(WishList.id == wishlist_id).first()
     if wishlist is None:
         raise HTTPException(status_code=404, detail="WishList not found")
-    print(f"us_id: {user['id']}; owner_id: {wishlist.owner_id}")
-    print(f"members: {[m.id for m in wishlist.members]}")
     if wishlist.owner_id != user["id"]:
         members_ids = [m.id for m in wishlist.members]
         if user["id"] not in members_ids:
@@ -132,8 +129,8 @@ async def get_wishes(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ) -> list:
-    wishlist_owner = db.query(WishList).filter(WishList.id == wishlist_id).first()
-    if wishlist_owner is None or current_user["id"] != wishlist_owner.id:
+    wishlist = db.query(WishList).filter(WishList.id == wishlist_id).first()
+    if wishlist is None or current_user["id"] != wishlist.owner.id:
         raise HTTPException(status_code=403, detail="No access")
 
     wishes = db.query(Wish).filter(Wish.wishlist_id == wishlist_id).all()
