@@ -54,6 +54,7 @@ async def get_wishlist(
     wishlist = db.query(WishList).filter(WishList.id == wishlist_id).first()
     if wishlist is None:
         raise HTTPException(status_code=404, detail="WishList not found")
+    print(f"us_id: {user['id']}; owner_id: {wishlist.owner_id}")
     if wishlist.owner_id != user["id"] and user["id"] not in [
         m.id for m in wishlist.members
     ]:
