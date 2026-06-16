@@ -17,10 +17,9 @@ async def get_wish(
     wish = db.query(Wish).filter(Wish.id == wish_id).first()
     if not wish:
         raise HTTPException(status_code=404, detail="Wish not found")
-    if (
-        current_user != wish.wishlist.owner
-        and current_user not in wish.wishlist.members
-    ):
+    if current_user["id"] != wish.wishlist.owner_id and current_user["id"] not in [
+        m.id for m in wish.wishlist.members
+    ]:
         raise HTTPException(status_code=403, detail="No access")
 
     return wish
@@ -35,10 +34,9 @@ async def delete_wish(
     wish = db.query(Wish).filter(Wish.id == wish_id).first()
     if not wish:
         raise HTTPException(status_code=404, detail="Wish not found")
-    if (
-        current_user != wish.wishlist.owner
-        and current_user not in wish.wishlist.members
-    ):
+    if current_user["id"] != wish.wishlist.owner_id and current_user["id"] not in [
+        m.id for m in wish.wishlist.members
+    ]:
         raise HTTPException(status_code=403, detail="No access")
     db.delete(wish)
     db.commit()
@@ -56,10 +54,9 @@ async def update_wish(
     if not wish:
         raise HTTPException(status_code=404, detail="Wish not found")
 
-    if (
-        current_user != wish.wishlist.owner
-        and current_user not in wish.wishlist.members
-    ):
+    if current_user["id"] != wish.wishlist.owner_id and current_user["id"] not in [
+        m.id for m in wish.wishlist.members
+    ]:
         raise HTTPException(status_code=403, detail="No access")
 
     values = data.model_dump(exclude_unset=True)
@@ -82,10 +79,9 @@ async def complete_wish(
     if not wish:
         raise HTTPException(status_code=404, detail="Wish not found")
 
-    if (
-        current_user != wish.wishlist.owner
-        and current_user not in wish.wishlist.members
-    ):
+    if current_user["id"] != wish.wishlist.owner_id and current_user["id"] not in [
+        m.id for m in wish.wishlist.members
+    ]:
         raise HTTPException(status_code=403, detail="No access")
 
     wish.is_completed = data.is_completed

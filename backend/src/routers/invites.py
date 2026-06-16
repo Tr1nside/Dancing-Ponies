@@ -23,7 +23,7 @@ async def accept_invite(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    if user in wishlist.members or user == wishlist.owner:
+    if user in wishlist.members or user == wishlist.owner_id:
         raise HTTPException(status_code=400, detail="Already a member")
 
     wishlist.members.append(user)
