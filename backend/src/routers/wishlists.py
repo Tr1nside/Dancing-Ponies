@@ -55,10 +55,11 @@ async def get_wishlist(
     if wishlist is None:
         raise HTTPException(status_code=404, detail="WishList not found")
     print(f"us_id: {user['id']}; owner_id: {wishlist.owner_id}")
-    if wishlist.owner_id != user["id"] and user["id"] not in [
-        m.id for m in wishlist.members
-    ]:
-        raise HTTPException(status_code=403, detail="Forbidden")
+    print(f"members: {[m.id for m in wishlist.members]}")
+    if wishlist.owner_id != user["id"]:
+        members_ids = [m.id for m in wishlist.members]
+        if user["id"] not in members_ids:
+            raise HTTPException(status_code=403, detail="Forbidden")
 
     return wishlist
 
