@@ -4,23 +4,48 @@ import hashlib
 from urllib.parse import parse_qsl
 from fastapi import Header, HTTPException
 from src.config import config
-
+from src.models import User
+from src.database import SessionLocal
 
 DEBUG = config["DEBUG"]
 BOT_TOKEN = config["BOT_TOKEN"]
 
 
 async def get_current_user(x_init_data: str = Header(...)) -> dict:
-
-    if x_init_data == "test123" and DEBUG == "true":
-        return {"id": 123456789, "first_name": "Dev", "username": "devuser"}
-
     bot_token = BOT_TOKEN
     if not bot_token:
         raise HTTPException(status_code=401, detail="Bot token not found")
 
+    if DEBUG == "true":
+        try:
+            user_id = int(x_init_data)
+        except Exception:
+            user_id = 123456789
+        user = {"id": user_id, "first_name": "Dev", "username": "devuser"}
+    else:
+        try:
+            user = validate_init_data(x_init_data, bot_token)
+        except ValueError:
+            raise HTTPException(status_code=401, detail="Unauthorized")
+
     try:
-        user = validate_init_data(x_init_data, bot_token)
+        db = SessionLocal()
+        try:
+            db_user = db.query(User).filter(User.id == user["id"]).first()
+            if not db_user:
+                db_user = User(
+                    id=user["id"],
+                    first_name=user.get("first_name", ""),
+                    username=user.get("username"),
+                )
+                db.add(db_user)
+            else:
+                db_user.first_name = user.get("first_name", db_user.first_name)
+                db_user.username = user.get("username", db_user.username)
+            db.commit()
+        finally:
+            db.close()
+
         return user
     except ValueError:
         raise HTTPException(status_code=401, detail="Unauthorized")

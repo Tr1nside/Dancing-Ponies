@@ -1,9 +1,11 @@
+import { retrieveLaunchParams } from "@telegram-apps/sdk";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createWish, getWishes, handleWishComplete } from "../api/wishes";
 import { deleteWishlist, getWishlist } from "../api/wishlists";
 import BackButton from "../components/BackButton";
 import { DropdownMenu } from "../components/DropdownMenu";
+import MembersPanel from "../components/MembersPanel";
 import WishCard from "../components/WishCard";
 import type { Wish, Wishlist } from "../types";
 
@@ -17,6 +19,14 @@ export default function WishesPage() {
 	const [title, setTitle] = useState<string>("");
 	const [price, setPrice] = useState<number>(0);
 	const [url, setUrl] = useState<string>("");
+	const [membersOpen, setMembersOpen] = useState(false);
+	let currentUserId = 0;
+	try {
+		const { initData } = retrieveLaunchParams();
+		currentUserId = initData?.user?.id ?? 0;
+	} catch {
+		currentUserId = Number(import.meta.env.VITE_DEV_INIT_DATA);
+	}
 
 	const handleCreate = async () => {
 		if (!title.trim()) return;
@@ -81,6 +91,8 @@ export default function WishesPage() {
 		}
 	};
 
+	const openMemberEdit = () => setMembersOpen(true);
+
 	useEffect(() => {
 		if (wishlistId) {
 			getWishes(Number(wishlistId))
@@ -104,13 +116,49 @@ export default function WishesPage() {
 
 	return (
 		<div className="page-div">
+			{membersOpen && wishlist && (
+				<div className="modal-overlay">
+					<button
+						type="button"
+						className="modal-backdrop"
+						onClick={() => setMembersOpen(false)}
+						aria-label="Закрыть"
+					/>
+					<div className="modal-content">
+						<MembersPanel
+							wishlist={wishlist}
+							currentUserId={currentUserId}
+							onMemberKicked={(userId) =>
+								setWishlist((prev) =>
+									prev
+										? {
+												...prev,
+												members: prev.members.filter((m) => m.id !== userId),
+											}
+										: prev,
+								)
+							}
+						/>
+						<button
+							type="button"
+							className="btn-secondary"
+							onClick={() => setMembersOpen(false)}
+						>
+							Закрыть
+						</button>
+					</div>
+				</div>
+			)}
 			<header className="wishlist-header" style={{ position: "relative" }}>
 				<BackButton onClick={() => navigate("/")} />
 				<h1>
 					{wishlist?.emoji} {wishlist?.title}
 				</h1>
 				<DropdownMenu
-					items={[{ label: "Удалить", onClick: handleDeleteList }]}
+					items={[
+						{ label: "Удалить", onClick: handleDeleteList },
+						{ label: "Управление участниками", onClick: openMemberEdit },
+					]}
 				/>
 			</header>
 			<div className="new-wish-form">

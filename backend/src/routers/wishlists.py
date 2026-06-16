@@ -66,6 +66,8 @@ async def delete_wishlist(wishlist_id: int, db: Session = Depends(get_db)) -> di
     if wishlist is None:
         raise HTTPException(status_code=404, detail="WishList not found")
 
+    db.query(Wish).filter(Wish.wishlist_id == wishlist_id).delete()
+
     db.delete(wishlist)
     db.commit()
     return {"deleted_id": wishlist.id}
