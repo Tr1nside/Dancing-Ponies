@@ -130,7 +130,10 @@ async def get_wishes(
     current_user: dict = Depends(get_current_user),
 ) -> list:
     wishlist = db.query(WishList).filter(WishList.id == wishlist_id).first()
-    if wishlist is None or current_user["id"] != wishlist.owner.id:
+    if wishlist is None or (
+        current_user["id"] != wishlist.owner.id
+        and current_user["id"] not in [mem.id for mem in wishlist.members]
+    ):
         raise HTTPException(status_code=403, detail="No access")
 
     wishes = db.query(Wish).filter(Wish.wishlist_id == wishlist_id).all()
