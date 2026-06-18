@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from src.routers import invites, wishes, wishlists
 from src.database import engine, Base
-from config import config
+from src.config import config
 from fastapi.middleware.cors import CORSMiddleware
 # import src.models as models
 
