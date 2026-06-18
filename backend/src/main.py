@@ -1,11 +1,16 @@
+import logging
 from fastapi import FastAPI
 from src.routers import invites, wishes, wishlists
 from src.database import engine, Base
 from src.config import config
 from fastapi.middleware.cors import CORSMiddleware
-# import src.models as models
 
-print(config)
+logger = logging.getLogger(__name__)
+
+logger.info("\n\n\n")
+logger.info(config)
+logger.info("\n\n\n")
+
 app = FastAPI()
 
 app.add_middleware(
