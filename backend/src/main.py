@@ -1,10 +1,11 @@
 from fastapi import FastAPI
 from src.routers import invites, wishes, wishlists
 from src.database import engine, Base
-
+from config import config
 from fastapi.middleware.cors import CORSMiddleware
 # import src.models as models
 
+print(config)
 app = FastAPI()
 
 app.add_middleware(
@@ -17,6 +18,8 @@ Base.metadata.create_all(bind=engine)
 app.include_router(invites.router)
 app.include_router(wishes.router)
 app.include_router(wishlists.router)
+
+print(config)
 
 
 @app.get("/")
