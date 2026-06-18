@@ -491,11 +491,7 @@ input:focus {
 .modal-backdrop {
 	position: absolute;
 	inset: 0;
-	background: color-mix(
-		in srgb,
-		var(--tg-theme-text-color, #000000) 50%,
-		transparent
-	);
+	background: #000000b1;
 	border: none;
 	border-radius: 0;
 	padding: 0;
