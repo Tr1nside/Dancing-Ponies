@@ -8,3 +8,4 @@ config = {
     **(dotenv_values(config_path) if config_path.exists() else {}),
     **os.environ,
 }
+print(config)
