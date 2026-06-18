@@ -1,7 +1,12 @@
 import { retrieveLaunchParams } from "@telegram-apps/sdk";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { createWish, getWishes, handleWishComplete } from "../api/wishes";
+import {
+	createWish,
+	deleteWish,
+	getWishes,
+	handleWishComplete,
+} from "../api/wishes";
 import { deleteWishlist, getWishlist, updateWishlist } from "../api/wishlists";
 import BackButton from "../components/BackButton";
 import { DropdownMenu, type MenuItem } from "../components/DropdownMenu";
@@ -101,6 +106,14 @@ export default function WishesPage() {
 			);
 			setError(e instanceof Error ? e.message : "Error");
 			return;
+		}
+	};
+	const handleDeleteWish = async (wish: Wish) => {
+		try {
+			await deleteWish(wish.id);
+			setWishes((prev) => prev.filter((w) => w.id !== wish.id));
+		} catch (e) {
+			setError(e instanceof Error ? e.message : "Undefined error");
 		}
 	};
 
@@ -234,6 +247,7 @@ export default function WishesPage() {
 						wish={w}
 						onClick={() => navigate(`/wishes/${w.id}`)}
 						onComplete={(completed) => handleComplete(w.id, completed)}
+						deleteWishF={handleDeleteWish}
 					/>
 				))}
 			</div>

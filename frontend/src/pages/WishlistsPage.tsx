@@ -1,7 +1,8 @@
+import { retrieveLaunchParams } from "@telegram-apps/sdk";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { createWishlist, getWishlists } from "../api/wishlists";
-import { DropdownMenu } from "../components/DropdownMenu";
+import { createWishlist, deleteWishlist, getWishlists } from "../api/wishlists";
+import { DropdownMenu, type MenuItem } from "../components/DropdownMenu";
 import type { Wishlist } from "../types";
 
 export default function WishlistsPage() {
@@ -10,6 +11,24 @@ export default function WishlistsPage() {
 	const [error, setError] = useState<string | null>(null);
 	const [title, setTitle] = useState<string>("");
 	const [emoji, setEmoji] = useState<string>("");
+
+	let currentUserId = 0;
+	try {
+		const { initData } = retrieveLaunchParams();
+		currentUserId = initData?.user?.id ?? 0;
+	} catch {
+		currentUserId = Number(import.meta.env.VITE_DEV_INIT_DATA);
+	}
+
+	const handleDeleteList = async (wishlist: Wishlist) => {
+		try {
+			await deleteWishlist(wishlist.id);
+			setWishlists((prev) => prev.filter((w) => w.id !== wishlist.id));
+		} catch (e) {
+			setError(e instanceof Error ? e.message : "Undefind error");
+			return;
+		}
+	};
 
 	const handleCreate = async () => {
 		if (!title.trim()) return;
@@ -68,14 +87,18 @@ export default function WishlistsPage() {
 							<p className="emoji-icon">{w.emoji}</p> {w.title}
 						</span>
 						<DropdownMenu
-							items={[
-								{
-									label: "Delete",
-									onClick: () => {
-										console.log;
-									},
-								},
-							]}
+							items={
+								[
+									w.owner_id === currentUserId
+										? {
+												label: "Delete",
+												onClick: () => {
+													handleDeleteList(w);
+												},
+											}
+										: null,
+								].filter(Boolean) as MenuItem[]
+							}
 						/>
 					</Link>
 				))}

@@ -53,7 +53,9 @@ export function DropdownMenu({ items }: { items: MenuItem[] }) {
 						<button
 							type="button"
 							key={item.label}
-							onClick={() => {
+							onClick={(e) => {
+								e.preventDefault();
+								e.stopPropagation();
 								item.onClick();
 								setOpen(false);
 							}}

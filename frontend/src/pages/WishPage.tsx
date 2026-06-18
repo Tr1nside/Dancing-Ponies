@@ -54,6 +54,7 @@ function EditableField({
 			type={type}
 			onChange={onChange}
 			placeholder={placeholder}
+			className="wish-input"
 		/>
 	);
 }
@@ -184,24 +185,18 @@ export default function WishesPage() {
 				/>
 			</header>
 			<div className="wish-body">
+				<p className="exp">Wish</p>
+
 				<EditableField
 					isEditing={isEditing}
-					value={editData.url}
-					display={
-						wish.url && (
-							<a
-								href={normalizeUrl(wish.url)}
-								target="_blank"
-								rel="noopener noreferrer"
-							>
-								Ссылка
-							</a>
-						)
-					}
-					type="url"
-					onChange={(e) => updateField("url", normalizeUrl(e.target.value))}
-					placeholder="Ссылка"
+					value={editData.description}
+					display={wish.description && <p>{wish.description}</p>}
+					type="text"
+					onChange={(e) => updateField("description", e.target.value)}
+					placeholder="Description"
+					multiline={true}
 				/>
+
 				<EditableField
 					isEditing={isEditing}
 					value={editData.price}
@@ -210,22 +205,36 @@ export default function WishesPage() {
 					onChange={(e) => updateField("price", Number(e.target.value))}
 					placeholder="Цена"
 				/>
-				<EditableField
-					isEditing={isEditing}
-					value={editData.description}
-					display={wish.description && <p>{wish.description}</p>}
-					type="text"
-					onChange={(e) => updateField("description", e.target.value)}
-					placeholder="Описание"
-					multiline={true}
-				/>
 
-				<button onClick={handleComplete} type="button">
-					{wish.is_completed ? "✓ Выполнено" : "Отметить выполненным"}
-				</button>
-
-				{isEditing ? (
-					<div className="edit-actions">
+				<div className="wish-btns">
+					<EditableField
+						isEditing={isEditing}
+						value={editData.url}
+						display={
+							wish.url && (
+								<button
+									type="button"
+									onClick={() => window.open(wish.url, "_blank")}
+									className="btn-primary"
+								>
+									Buy
+								</button>
+							)
+						}
+						type="url"
+						onChange={(e) => updateField("url", normalizeUrl(e.target.value))}
+						placeholder="Link"
+					/>
+					<button
+						onClick={handleComplete}
+						className="btn-secondary"
+						type="button"
+					>
+						{wish.is_completed ? "Done" : "Mark as done"}
+					</button>
+				</div>
+				{isEditing && (
+					<div className="wish-btns">
 						<button type="button" onClick={handleSave}>
 							✓ Сохранить
 						</button>
@@ -233,10 +242,6 @@ export default function WishesPage() {
 							Отмена
 						</button>
 					</div>
-				) : (
-					<button type="button" onClick={handleEdit}>
-						Редактировать
-					</button>
 				)}
 			</div>
 		</div>

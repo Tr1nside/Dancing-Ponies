@@ -5,9 +5,15 @@ interface WishCardProps {
 	wish: Wish;
 	onClick: () => void;
 	onComplete: (completed: boolean) => void;
+	deleteWishF: (wish: Wish) => void;
 }
 
-export default function WishCard({ wish, onClick, onComplete }: WishCardProps) {
+export default function WishCard({
+	wish,
+	onClick,
+	onComplete,
+	deleteWishF,
+}: WishCardProps) {
 	return (
 		<div className="wishcard-div">
 			<span className="wishlist-left">
@@ -16,7 +22,12 @@ export default function WishCard({ wish, onClick, onComplete }: WishCardProps) {
 					checked={wish.is_completed}
 					onChange={(e) => onComplete(e.target.checked)}
 				/>
-				<button className="wish-btn" type="button" key={wish.id} onClick={onClick}>
+				<button
+					className="wish-btn"
+					type="button"
+					key={wish.id}
+					onClick={onClick}
+				>
 					{wish.title} {wish.price ? `— ${wish.price}₽` : ""}
 				</button>
 			</span>
@@ -24,9 +35,7 @@ export default function WishCard({ wish, onClick, onComplete }: WishCardProps) {
 				items={[
 					{
 						label: "Delete",
-						onClick: () => {
-							console.log;
-						},
+						onClick: () => deleteWishF(wish),
 					},
 				]}
 			/>
