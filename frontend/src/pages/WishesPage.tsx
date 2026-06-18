@@ -2,9 +2,9 @@ import { retrieveLaunchParams } from "@telegram-apps/sdk";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createWish, getWishes, handleWishComplete } from "../api/wishes";
-import { deleteWishlist, getWishlist } from "../api/wishlists";
+import { deleteWishlist, getWishlist, updateWishlist } from "../api/wishlists";
 import BackButton from "../components/BackButton";
-import { DropdownMenu } from "../components/DropdownMenu";
+import { DropdownMenu, type MenuItem } from "../components/DropdownMenu";
 import MembersPanel from "../components/MembersPanel";
 import WishCard from "../components/WishCard";
 import type { Wish, Wishlist } from "../types";
@@ -18,7 +18,8 @@ export default function WishesPage() {
 	const [error, setError] = useState<string | null>(null);
 	const [title, setTitle] = useState<string>("");
 	const [price, setPrice] = useState<number>(0);
-	const [url, setUrl] = useState<string>("");
+	const [listTitle, setListTitle] = useState<string>("");
+	const [emoji, setEmoji] = useState<string>("");
 	const [membersOpen, setMembersOpen] = useState(false);
 	let currentUserId = 0;
 	try {
@@ -27,7 +28,21 @@ export default function WishesPage() {
 	} catch {
 		currentUserId = Number(import.meta.env.VITE_DEV_INIT_DATA);
 	}
+	const isOwner = wishlist?.owner_id === currentUserId;
 
+	const handleSave = async () => {
+		if (!wishlistId) return;
+		try {
+			const updated = await updateWishlist(Number(wishlistId), {
+				title: listTitle || undefined,
+				emoji: emoji || undefined,
+			});
+			setWishlist(updated);
+			setMembersOpen(false);
+		} catch (e) {
+			setError(e instanceof Error ? e.message : "Error");
+		}
+	};
 	const handleCreate = async () => {
 		if (!title.trim()) return;
 		if (wishlistId === undefined) {
@@ -42,13 +57,11 @@ export default function WishesPage() {
 			const newWish = await createWish({
 				title,
 				price,
-				url,
 				wishlist_id: wishlistIdInt,
 			});
 			setWishes([...wishes, newWish]); // добавляем в список без перезагрузки
 			setTitle(""); // очищаем форму
 			setPrice(0);
-			setUrl("");
 		} catch (e) {
 			setError(e instanceof Error ? e.message : "Error");
 		}
@@ -91,7 +104,11 @@ export default function WishesPage() {
 		}
 	};
 
-	const openMemberEdit = () => setMembersOpen(true);
+	const openMemberEdit = () => {
+		setListTitle(wishlist?.title ?? "");
+		setEmoji(wishlist?.emoji ?? "");
+		setMembersOpen(true);
+	};
 
 	useEffect(() => {
 		if (wishlistId) {
@@ -125,6 +142,36 @@ export default function WishesPage() {
 						aria-label="Закрыть"
 					/>
 					<div className="modal-content">
+						{/* <div className="wishlish-edit"></div> */}
+						{isOwner && (
+							<div className="wishlist-edit">
+								<input
+									type="text"
+									value={listTitle}
+									id="title-input"
+									placeholder="Title..."
+									onChange={(e) => {
+										setListTitle(e.target.value);
+									}}
+								/>
+								<input
+									type="text"
+									value={emoji}
+									id="emoji-input"
+									placeholder="😊"
+									maxLength={2}
+									onChange={(e) => {
+										setEmoji(e.target.value);
+									}}
+								/>
+								<input
+									type="submit"
+									className="btn-primary"
+									value="Save"
+									onClick={handleSave}
+								/>
+							</div>
+						)}
 						<MembersPanel
 							wishlist={wishlist}
 							currentUserId={currentUserId}
@@ -139,13 +186,11 @@ export default function WishesPage() {
 								)
 							}
 						/>
-						<button
-							type="button"
-							className="btn-secondary"
-							onClick={() => setMembersOpen(false)}
-						>
-							Закрыть
-						</button>
+						<span className="end-row">
+							<button type="button" onClick={() => setMembersOpen(false)}>
+								Cancel
+							</button>
+						</span>
 					</div>
 				</div>
 			)}
@@ -155,47 +200,43 @@ export default function WishesPage() {
 					{wishlist?.emoji} {wishlist?.title}
 				</h1>
 				<DropdownMenu
-					items={[
-						{ label: "Удалить", onClick: handleDeleteList },
-						{ label: "Управление участниками", onClick: openMemberEdit },
-					]}
+					items={
+						[
+							isOwner ? { label: "Delete", onClick: handleDeleteList } : null,
+							{ label: "Management", onClick: openMemberEdit },
+						].filter(Boolean) as MenuItem[]
+					}
 				/>
 			</header>
-			<div className="new-wish-form">
-				<input
-					type="text"
-					value={title}
-					id="title-input"
-					placeholder="Название"
-					onChange={(e) => setTitle(e.target.value)}
-				/>
-				<div className="price-url-row">
+			<div className="cards">
+				<div className="new-wish-form">
+					<input
+						type="text"
+						value={title}
+						id="title-input"
+						placeholder="Title..."
+						onChange={(e) => setTitle(e.target.value)}
+					/>
 					<input
 						type="number"
 						value={price || ""}
 						id="price-input"
-						placeholder="Цена"
+						placeholder="Price"
 						onChange={(e) => setPrice(Number(e.target.value))}
 					/>
-					<input
-						type="text"
-						value={url}
-						id="url-input"
-						placeholder="Ссылка"
-						onChange={(e) => setUrl(e.target.value)}
-					/>
+					<input type="button" onClick={handleCreate} value="Create" />
 				</div>
-				<input type="button" onClick={handleCreate} value="Создать" />
-			</div>
 
-			{wishes.map((w) => (
-				<WishCard
-					key={w.id}
-					wish={w}
-					onClick={() => navigate(`/wishes/${w.id}`)}
-					onComplete={(completed) => handleComplete(w.id, completed)}
-				/>
-			))}
+				<p className="exp">My Wishes</p>
+				{wishes.map((w) => (
+					<WishCard
+						key={w.id}
+						wish={w}
+						onClick={() => navigate(`/wishes/${w.id}`)}
+						onComplete={(completed) => handleComplete(w.id, completed)}
+					/>
+				))}
+			</div>
 		</div>
 	);
 }

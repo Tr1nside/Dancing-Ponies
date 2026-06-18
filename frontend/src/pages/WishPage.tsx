@@ -177,10 +177,8 @@ export default function WishesPage() {
 				<DropdownMenu
 					items={
 						[
-							!isEditing
-								? { label: "Редактировать", onClick: handleEdit }
-								: null,
-							{ label: "Удалить", onClick: handleDeleteWish },
+							!isEditing ? { label: "Edit", onClick: handleEdit } : null,
+							{ label: "Delete", onClick: handleDeleteWish },
 						].filter(Boolean) as MenuItem[]
 					}
 				/>

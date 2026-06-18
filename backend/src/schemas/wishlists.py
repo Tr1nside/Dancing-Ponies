@@ -25,3 +25,8 @@ class WishListResponse(BaseModel):
     members: list[UserResponse] = []
 
     model_config = {"from_attributes": True}
+
+
+class WishListUpdate(BaseModel):
+    title: str | None = None
+    emoji: str | None = None

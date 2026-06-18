@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { createWishlist, getWishlists } from "../api/wishlists";
+import { DropdownMenu } from "../components/DropdownMenu";
 import type { Wishlist } from "../types";
 
 export default function WishlistsPage() {
@@ -37,8 +38,16 @@ export default function WishlistsPage() {
 
 	return (
 		<div className="page-div">
-			<h1>Мои списки</h1>
 			<div className="new-wishlist-input">
+				<input
+					type="text"
+					value={title}
+					id="title-input"
+					placeholder="Title..."
+					onChange={(e) => {
+						setTitle(e.target.value);
+					}}
+				/>
 				<input
 					type="text"
 					value={emoji}
@@ -49,22 +58,28 @@ export default function WishlistsPage() {
 						setEmoji(e.target.value);
 					}}
 				/>
-				<input
-					type="text"
-					value={title}
-					id="title-input"
-					placeholder="Название"
-					onChange={(e) => {
-						setTitle(e.target.value);
-					}}
-				/>
-				<input type="submit" value="Создать" onClick={handleCreate} />
+				<input type="submit" value="Create" onClick={handleCreate} />
 			</div>
-			{wishlists.map((w) => (
-				<Link key={w.id} className="wishlist-div" to={`/wishlists/${w.id}`}>
-					{w.emoji} {w.title}
-				</Link>
-			))}
+			<div className="cards">
+				<p className="exp">My Wishlists</p>
+				{wishlists.map((w) => (
+					<Link key={w.id} className="wishlist-div" to={`/wishlists/${w.id}`}>
+						<span className="wishlist-left">
+							<p className="emoji-icon">{w.emoji}</p> {w.title}
+						</span>
+						<DropdownMenu
+							items={[
+								{
+									label: "Delete",
+									onClick: () => {
+										console.log;
+									},
+								},
+							]}
+						/>
+					</Link>
+				))}
+			</div>
 		</div>
 	);
 }

@@ -30,3 +30,11 @@ export async function kickMember(
 ): Promise<void> {
 	await client.delete(`/wishlists/${wishlistId}/members/${userId}`);
 }
+
+export const updateWishlist = async (
+	id: number,
+	data: { title?: string; emoji?: string },
+): Promise<Wishlist> => {
+	const response = await client.patch(`/wishlists/${id}`, data);
+	return response.data;
+};

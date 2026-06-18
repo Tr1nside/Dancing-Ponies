@@ -30,22 +30,35 @@ p {
 	min-height: 100dvh;
 }
 
+.exp {
+	margin-bottom: 16px;
+	font-style: normal;
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 18px;
+
+	color: #808080;
+}
+
 /* ---- Header ---- */
 
 header {
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	padding: 12px 16px;
-	border-bottom: 1px solid var(--tg-theme-hint-color, #e0e0e0);
-	position: sticky;
-	top: 0;
-	background-color: var(--tg-theme-bg-color, #ffffff);
+	justify-content: space-between;
+	gap: 0.5rem;
+	padding: 10px;
+	box-shadow:
+		-3px -3px 8px rgba(255, 255, 255, 0.3),
+		3px 3px 8px rgba(0, 0, 0, 0.3);
+	border-radius: 15px;
+	width: 100%;
+	margin-bottom: 1.25rem;
 }
 
 header h1 {
-	flex: 1;
-	font-size: 18px;
+	/* flex: 1; */
+	font-size: 1.5rem;
 	font-weight: 600;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -82,9 +95,51 @@ header h1 {
 .wishcard-div {
 	display: flex;
 	align-items: center;
-	gap: 12px;
-	padding: 12px 16px;
-	border-bottom: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+	justify-content: space-between;
+	min-height: 40px;
+	gap: 1em;
+	padding: 0.625em 1em;
+	padding-right: 0;
+	cursor: pointer;
+}
+
+.wishcard-div button {
+	font-size: 1rem;
+	padding: 0;
+	background-color: white;
+}
+
+.wishcard-div input[type="checkbox"] {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 1.3em;
+	height: 1.3em;
+	padding: 0;
+	background: #ffffff;
+	border: none;
+	box-shadow:
+		-2px -2px 4px rgba(255, 255, 255, 0.25),
+		2px 2px 4px rgba(0, 0, 0, 0.25);
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+.wishcard-div input[type="checkbox"]:checked {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 1.3em;
+	height: 1.3em;
+	padding: 0;
+	background: #2560e1;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+	border: none;
+	background-size: 80%;
+	background-repeat: no-repeat;
+	background-position: center;
+	box-shadow:
+		-2px -2px 4px rgba(255, 255, 255, 0.25),
+		2px 2px 4px rgba(0, 0, 0, 0.25);
+	border-radius: 5px;
 	cursor: pointer;
 }
 
@@ -100,21 +155,28 @@ button {
 	border: none;
 	border-radius: 10px;
 	padding: 10px 16px;
-	font-size: 15px;
+	font-size: 1rem;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 }
 
 .btn-primary {
-	background-color: var(--tg-theme-button-color, #2481cc);
-	color: var(--tg-theme-button-text-color, #ffffff);
-	width: 100%;
+	height: 44px;
+	padding: 10px;
+	font-size: 1rem;
+	border-radius: 7px;
+	background-color: #2563eb;
+	color: white;
 }
 
 .btn-secondary {
+	background: #ffffff;
+	border: 1px solid #808080;
+	border-radius: 7px;
+
 	background-color: transparent;
-	color: var(--tg-theme-link-color, #2481cc);
+	color: var(--tg-theme-link-color, #808080);
 }
 
 .btn-danger {
@@ -174,6 +236,9 @@ input:focus {
 
 /* --- WishlistsPage --- */
 .page-div {
+	display: flex;
+	flex-direction: column;
+	height: 100dvh;
 	padding: 1rem;
 	max-width: 600px;
 	margin: 0 auto; /* центрируем на широких экранах */
@@ -188,70 +253,108 @@ input:focus {
 .new-wishlist-input {
 	display: flex;
 	gap: 0.5rem;
+	padding: 10px;
+	box-shadow:
+		-3px -3px 8px rgba(255, 255, 255, 0.3),
+		3px 3px 8px rgba(0, 0, 0, 0.3);
+	border-radius: 15px;
 	width: 100%;
 	margin-bottom: 1.25rem;
 }
 
 /* Эмодзи — фиксированный, не растёт и не сжимается */
 #emoji-input {
-	flex: 0 0 44px; /* grow=0, shrink=0, basis=44px */
+	flex: 0 0 44px;
 	width: 44px;
 	height: 44px;
-	min-width: 0; /* ← убирает дефолтный min-width у input */
+	min-width: 0;
 	text-align: center;
-	font-size: 1.25rem;
-	border-radius: 10px;
+	background: #ffffff;
+
+	font-size: 1rem;
+	border-radius: 7px;
 	border: 1px solid #ccc;
-	padding: 0;
+	padding: 10px;
 }
 
 /* Title — занимает всё свободное место */
 #title-input {
-	flex: 1 1 0; /* ← flex-basis: 0 вместо auto, чтобы точно растягивался */
-	min-width: 0; /* ← главный фикс, без этого input не сжимается */
+	flex: 1 1 0;
+	min-width: 0;
 	height: 44px;
+
+	background: #ffffff;
 	font-size: 1rem;
-	border-radius: 10px;
+	border-radius: 7px;
 	border: 1px solid #ccc;
-	padding: 0 0.75rem;
+	padding: 10px;
 }
 
 /* Кнопка — только по контенту */
 .new-wishlist-input input[type="submit"] {
-	flex: 0 0 auto; /* ← не растёт, размер только по тексту */
+	flex: 0 0 auto;
 	height: 44px;
-	padding: 0 1rem;
-	font-size: 0.875rem;
-	font-weight: 600;
-	border: none;
-	border-radius: 10px;
+	padding: 10px;
+	font-size: 1rem;
+	border-radius: 7px;
 	background-color: #2563eb;
 	color: white;
-	cursor: pointer;
-	white-space: nowrap;
 }
 
 .new-wishlist-input input[type="submit"]:active {
-	background-color: #1d4ed8;
+	background: #1b57da;
+	box-shadow:
+		inset 1px 1px 4px rgba(0, 0, 0, 0.25),
+		inset -1px -1px 4px rgba(255, 255, 255, 0.25);
 }
 
 /* Карточки вишлистов */
+
+.cards {
+	flex: 1;
+	overflow-y: auto;
+	padding: 10px;
+	background: #ffffff;
+	box-shadow:
+		-3px -3px 8px rgba(255, 255, 255, 0.3),
+		3px 3px 8px rgba(0, 0, 0, 0.3);
+	border-radius: 15px;
+}
+
 .wishlist-div {
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
 	gap: 0.5rem;
-	padding: 0.75rem 1rem;
+	padding: 0.75rem 0.625rem;
 	margin-bottom: 0.5rem;
 	border-radius: 12px;
-	border: 1px solid #e5e7eb;
+	border: 1px solid #e5e7eb86;
+	box-shadow:
+		-2px -2px 4px rgba(255, 255, 255, 0.2),
+		2px 2px 4px rgba(0, 0, 0, 0.2);
 	font-size: 1rem;
 	text-decoration: none;
 	color: inherit;
 	transition: background 0.15s;
 }
 
+.wishlist-left {
+	display: flex;
+	align-items: center;
+	gap: 1em;
+}
+
 .wishlist-div:active {
-	background-color: #f3f4f6;
+	background-color: #f8f8f8;
+	box-shadow:
+		inset 1px 1px 4px rgba(0, 0, 0, 0.25),
+		inset -1px -1px 4px rgba(255, 255, 255, 0.25);
+}
+
+.emoji-icon {
+	font-size: 1.5rem;
+	margin-top: -4px;
 }
 
 /* На широких экранах чуть больше отступы */
@@ -267,10 +370,9 @@ input:focus {
 
 .new-wish-form {
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	gap: 0.5rem;
 	margin-bottom: 1.25rem;
-	height: 150px;
 }
 
 .new-wish-form input {
@@ -278,27 +380,15 @@ input:focus {
 	height: 44px;
 }
 
-/* Цена и ссылка — в одну строку */
-.price-url-row {
-	display: flex;
-	gap: 0.5rem;
-}
-
 #price-input {
-	flex: 0 0 100px; /* фиксированная ширина */
-	min-width: 0;
-}
-
-#url-input {
-	flex: 1; /* занимает остаток */
+	flex: 0 0 80px; /* фиксированная ширина */
 	min-width: 0;
 }
 
 /* Кнопка на всю ширину */
 .new-wish-form input[type="button"] {
-	width: 100%;
 	height: 44px;
-	font-size: 0.875rem;
+	font-size: 1rem;
 	font-weight: 600;
 	border: none;
 	border-radius: 10px;
@@ -308,7 +398,10 @@ input:focus {
 }
 
 .new-wish-form input[type="button"]:active {
-	opacity: 0.8;
+	background: #1b57da;
+	box-shadow:
+		inset 1px 1px 4px rgba(0, 0, 0, 0.25),
+		inset -1px -1px 4px rgba(255, 255, 255, 0.25);
 }
 
 #description-input {
@@ -340,13 +433,13 @@ input:focus {
 	align-items: center;
 	justify-content: center;
 	color: var(--tg-theme-text-color, #000000);
+	z-index: 1;
 }
 
 .members-panel {
 	display: flex;
 	flex-direction: column;
 	gap: 0.75rem;
-	padding: 16px;
 }
 
 .members-panel h2 {
@@ -359,21 +452,28 @@ input:focus {
 	align-items: center;
 	justify-content: space-between;
 	padding: 10px 0;
-	border-bottom: 1px solid var(--tg-theme-hint-color, #e0e0e0);
 }
 
 .invite-box {
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	gap: 0.5rem;
-	padding: 12px;
-	background: var(--tg-theme-secondary-bg-color, #f5f5f5);
 	border-radius: 10px;
+	border: 1px solid #808080;
+	height: 44px;
+	align-items: center;
+	justify-content: space-between;
 }
 
 .invite-url {
+	padding: 10px;
+	justify-content: center;
+	align-items: center;
 	font-size: 0.8rem;
 	word-break: break-all;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	color: var(--tg-theme-hint-color, #999);
 }
 
@@ -383,6 +483,8 @@ input:focus {
 	z-index: 200;
 	display: flex;
 	align-items: flex-end;
+	justify-content: center;
+	margin: auto;
 }
 
 .modal-backdrop {
@@ -396,12 +498,55 @@ input:focus {
 }
 
 .modal-content {
+	display: flex;
+	flex-direction: column;
+	gap: 1em;
 	position: relative; /* поверх backdrop */
 	width: 100%;
 	max-height: 80dvh;
 	overflow-y: auto;
 	background: var(--tg-theme-bg-color, #ffffff);
-	border-radius: 16px 16px 0 0;
-	padding-bottom: 16px;
+	border-radius: 1em 1em 0 0;
+	padding: 1em;
 	z-index: 1;
+	max-width: 600px;
+}
+
+.modal-content .end-row {
+	display: flex;
+	flex-direction: row;
+	justify-content: right;
+}
+.modal-content .end-row button {
+	max-width: 80px;
+
+	background: #ffffff;
+	border: 1px solid #808080;
+	color: #808080;
+	border-radius: 7px;
+}
+
+.copy-btn {
+	min-width: 80px;
+	min-height: 44px;
+}
+
+.member-column {
+	box-shadow:
+		-3px -3px 8px rgba(255, 255, 255, 0.3),
+		3px 3px 8px rgba(0, 0, 0, 0.3);
+	padding: 10px;
+	border-radius: 15px;
+	margin-bottom: 0.25em;
+}
+
+.wishlist-edit {
+	display: flex;
+	gap: 0.5rem;
+	padding: 10px;
+	box-shadow:
+		-3px -3px 8px rgba(255, 255, 255, 0.3),
+		3px 3px 8px rgba(0, 0, 0, 0.3);
+	border-radius: 15px;
+	width: 100%;
 }

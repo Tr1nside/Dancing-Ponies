@@ -27,7 +27,11 @@ export function DropdownMenu({ items }: { items: MenuItem[] }) {
 		<div className="dropdown" ref={ref}>
 			<button
 				type="button"
-				onClick={() => setOpen(!open)}
+				onClick={(e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					setOpen(!open);
+				}}
 				className="dropdown-toggle"
 			>
 				<svg

@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from src.database import get_db
 from src.auth import get_current_user
 from src.models import WishList, User, Invite, Wish
-from src.schemas.wishlists import WishListCreate, WishListResponse
+from src.schemas.wishlists import WishListCreate, WishListResponse, WishListUpdate
 from src.schemas.invites import InviteResponse
 from src.schemas.wishes import WishCreate, WishResponse
 import secrets
@@ -25,6 +25,29 @@ async def get_wishlists(
         )
         .all()
     )
+
+
+@router.patch("/{wishlist_id}", response_model=WishListResponse)
+async def update_wishlist(
+    wishlist_id: int,
+    data: WishListUpdate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+) -> WishList:
+    wishlist = db.query(WishList).filter(WishList.id == wishlist_id).first()
+    if wishlist is None:
+        raise HTTPException(status_code=404, detail="WishList not found")
+    if current_user["id"] != wishlist.owner_id:
+        raise HTTPException(status_code=403, detail="No access")
+
+    if data.title is not None:
+        wishlist.title = data.title
+    if data.emoji is not None:
+        wishlist.emoji = data.emoji
+
+    db.commit()
+    db.refresh(wishlist)
+    return wishlist
 
 
 @router.post("/", response_model=WishListResponse)

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createInvite, kickMember } from "../api/wishlists";
 import type { User, Wishlist } from "../types";
+import { DropdownMenu } from "./DropdownMenu";
 
 interface Props {
 	wishlist: Wishlist;
@@ -43,45 +44,50 @@ export default function MembersPanel({
 
 	return (
 		<div className="members-panel">
-			<h2>Участники</h2>
+			<div className="member-column">
+				<p className="exp">Members</p>
 
-			<div className="member-row">
-				<span>
-					{wishlist.owner_id === currentUserId
-						? "Вы (владелец)"
-						: `${wishlist.owner.first_name}`}
-				</span>
-			</div>
-
-			{wishlist.members.map((member: User) => (
-				<div key={member.id} className="member-row">
-					<span>{member.first_name}</span>
-					{isOwner && member.id !== currentUserId && (
-						<button
-							type="button"
-							className="btn-danger"
-							onClick={() => handleKick(member.id)}
-						>
-							Удалить
-						</button>
-					)}
+				<div className="member-row">
+					<span>
+						{wishlist.owner_id === currentUserId
+							? "Вы (владелец)"
+							: `${wishlist.owner.first_name}`}
+					</span>
 				</div>
-			))}
 
-			<button
-				type="button"
-				className="btn-primary"
-				onClick={handleInvite}
-				disabled={loadingInvite}
-			>
-				{loadingInvite ? "Создаём..." : "Пригласить участника"}
-			</button>
+				{wishlist.members.map((member: User) => (
+					<div key={member.id} className="member-row">
+						<span>{member.first_name}</span>
+						{isOwner && member.id !== currentUserId && (
+							<DropdownMenu
+								items={[
+									{ label: "Kick", onClick: () => handleKick(member.id) },
+								]}
+							/>
+						)}
+					</div>
+				))}
+			</div>
+			{!inviteUrl && (
+				<button
+					type="button"
+					className="btn-secondary"
+					onClick={handleInvite}
+					disabled={loadingInvite}
+				>
+					{loadingInvite ? "Creating it..." : "Invite"}
+				</button>
+			)}
 
 			{inviteUrl && (
 				<div className="invite-box">
 					<span className="invite-url">{inviteUrl}</span>
-					<button type="button" className="btn-secondary" onClick={handleCopy}>
-						{copied ? "Скопировано!" : "Копировать"}
+					<button
+						type="button"
+						className="btn-primary copy-btn"
+						onClick={handleCopy}
+					>
+						{copied ? "Copied!" : "Copy"}
 					</button>
 				</div>
 			)}
