@@ -49,7 +49,7 @@ header {
 	gap: 0.5rem;
 	padding: 10px;
 	box-shadow:
-		-3px -3px 8px rgba(255, 255, 255, 0.3),
+		-3px -3px 8px rgba(255, 255, 255, 0.15),
 		3px 3px 8px rgba(0, 0, 0, 0.3);
 	border-radius: 15px;
 	width: 100%;
@@ -118,7 +118,7 @@ header h1 {
 	background: var(--tg-theme-bg-color, #ffffff);
 	border: none;
 	box-shadow:
-		-2px -2px 4px rgba(255, 255, 255, 0.2),
+		-2px -2px 4px rgba(255, 255, 255, 0.15),
 		2px 2px 4px rgba(0, 0, 0, 0.2);
 	border-radius: 5px;
 	cursor: pointer;
@@ -137,7 +137,7 @@ header h1 {
 	background-repeat: no-repeat;
 	background-position: center;
 	box-shadow:
-		-2px -2px 4px rgba(255, 255, 255, 0.2),
+		-2px -2px 4px rgba(255, 255, 255, 0.15),
 		2px 2px 4px rgba(0, 0, 0, 0.2);
 	border-radius: 5px;
 	cursor: pointer;
@@ -255,7 +255,7 @@ input:focus {
 	gap: 0.5rem;
 	padding: 10px;
 	box-shadow:
-		-3px -3px 8px rgba(255, 255, 255, 0.3),
+		-3px -3px 8px rgba(255, 255, 255, 0.15),
 		3px 3px 8px rgba(0, 0, 0, 0.3);
 	border-radius: 15px;
 	width: 100%;
@@ -305,7 +305,7 @@ input:focus {
 	background: var(--tg-theme-button-color, #1b57da);
 	box-shadow:
 		inset 1px 1px 4px rgba(0, 0, 0, 0.25),
-		inset -1px -1px 4px rgba(255, 255, 255, 0.25);
+		inset -1px -1px 4px rgba(255, 255, 255, 0.15);
 }
 
 /* Карточки вишлистов */
@@ -316,7 +316,7 @@ input:focus {
 	padding: 10px;
 	background: var(--tg-theme-bg-color, #ffffff);
 	box-shadow:
-		-3px -3px 8px rgba(255, 255, 255, 0.3),
+		-3px -3px 8px rgba(255, 255, 255, 0.15),
 		3px 3px 8px rgba(0, 0, 0, 0.3);
 	border-radius: 15px;
 }
@@ -332,7 +332,7 @@ input:focus {
 	border: 1px solid
 		color-mix(in srgb, var(--tg-theme-hint-color, #e5e7eb) 55%, transparent);
 	box-shadow:
-		-2px -2px 4px rgba(255, 255, 255, 0.2),
+		-2px -2px 4px rgba(255, 255, 255, 0.15),
 		2px 2px 4px rgba(0, 0, 0, 0.2);
 	font-size: 1rem;
 	text-decoration: none;
@@ -350,7 +350,7 @@ input:focus {
 	background-color: var(--tg-theme-secondary-bg-color, #f8f8f8);
 	box-shadow:
 		inset 1px 1px 4px rgba(0, 0, 0, 0.25),
-		inset -1px -1px 4px rgba(255, 255, 255, 0.25);
+		inset -1px -1px 4px rgba(255, 255, 255, 0.15);
 }
 
 .emoji-icon {
@@ -402,7 +402,7 @@ input:focus {
 	background: var(--tg-theme-button-color, #1b57da);
 	box-shadow:
 		inset 1px 1px 4px rgba(0, 0, 0, 0.25),
-		inset -1px -1px 4px rgba(255, 255, 255, 0.25);
+		inset -1px -1px 4px rgba(255, 255, 255, 0.15);
 }
 
 #description-input {
@@ -538,7 +538,7 @@ input:focus {
 
 .member-column {
 	box-shadow:
-		-3px -3px 8px rgba(255, 255, 255, 0.3),
+		-3px -3px 8px rgba(255, 255, 255, 0.15),
 		3px 3px 8px rgba(0, 0, 0, 0.3);
 	padding: 10px;
 	border-radius: 15px;
@@ -550,8 +550,12 @@ input:focus {
 	gap: 0.5rem;
 	padding: 10px;
 	box-shadow:
-		-3px -3px 8px rgba(255, 255, 255, 0.3),
+		-3px -3px 8px rgba(255, 255, 255, 0.15),
 		3px 3px 8px rgba(0, 0, 0, 0.3);
 	border-radius: 15px;
 	width: 100%;
+}
+
+.wish-btn {
+	color: var(--tg-theme-text-color, #000000);
 }

@@ -16,7 +16,7 @@ export default function WishCard({ wish, onClick, onComplete }: WishCardProps) {
 					checked={wish.is_completed}
 					onChange={(e) => onComplete(e.target.checked)}
 				/>
-				<button type="button" key={wish.id} onClick={onClick}>
+				<button className="wish-btn" type="button" key={wish.id} onClick={onClick}>
 					{wish.title} {wish.price ? `— ${wish.price}₽` : ""}
 				</button>
 			</span>
