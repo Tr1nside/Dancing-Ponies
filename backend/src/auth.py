@@ -7,7 +7,7 @@ from src.config import config
 from src.models import User
 from src.database import SessionLocal
 
-DEBUG = config["DEBUG"]
+DEBUG = config.get("DEBUG", False)
 BOT_TOKEN = config["BOT_TOKEN"]
 
 
