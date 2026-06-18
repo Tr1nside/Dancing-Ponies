@@ -37,7 +37,7 @@ p {
 	font-size: 14px;
 	line-height: 18px;
 
-	color: #808080;
+	color: var(--tg-theme-hint-color, #808080);
 }
 
 /* ---- Header ---- */
@@ -106,7 +106,7 @@ header h1 {
 .wishcard-div button {
 	font-size: 1rem;
 	padding: 0;
-	background-color: white;
+	background-color: var(--tg-theme-bg-color, #ffffff);
 }
 
 .wishcard-div input[type="checkbox"] {
@@ -115,11 +115,11 @@ header h1 {
 	width: 1.3em;
 	height: 1.3em;
 	padding: 0;
-	background: #ffffff;
+	background: var(--tg-theme-bg-color, #ffffff);
 	border: none;
 	box-shadow:
-		-2px -2px 4px rgba(255, 255, 255, 0.25),
-		2px 2px 4px rgba(0, 0, 0, 0.25);
+		-2px -2px 4px rgba(255, 255, 255, 0.2),
+		2px 2px 4px rgba(0, 0, 0, 0.2);
 	border-radius: 5px;
 	cursor: pointer;
 }
@@ -130,15 +130,15 @@ header h1 {
 	width: 1.3em;
 	height: 1.3em;
 	padding: 0;
-	background: #2560e1;
+	background: var(--tg-theme-button-color, #2560e1);
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
 	border: none;
 	background-size: 80%;
 	background-repeat: no-repeat;
 	background-position: center;
 	box-shadow:
-		-2px -2px 4px rgba(255, 255, 255, 0.25),
-		2px 2px 4px rgba(0, 0, 0, 0.25);
+		-2px -2px 4px rgba(255, 255, 255, 0.2),
+		2px 2px 4px rgba(0, 0, 0, 0.2);
 	border-radius: 5px;
 	cursor: pointer;
 }
@@ -166,13 +166,13 @@ button {
 	padding: 10px;
 	font-size: 1rem;
 	border-radius: 7px;
-	background-color: #2563eb;
-	color: white;
+	background-color: var(--tg-theme-button-color, #2563eb);
+	color: var(--tg-theme-button-text-color, #ffffff);
 }
 
 .btn-secondary {
-	background: #ffffff;
-	border: 1px solid #808080;
+	background: var(--tg-theme-bg-color, #ffffff);
+	border: 1px solid var(--tg-theme-hint-color, #808080);
 	border-radius: 7px;
 
 	background-color: transparent;
@@ -181,7 +181,7 @@ button {
 
 .btn-danger {
 	background-color: transparent;
-	color: #ff3b30;
+	color: var(--tg-theme-destructive-text-color, #ff3b30);
 }
 
 /* ---- Инпуты ---- */
@@ -269,11 +269,11 @@ input:focus {
 	height: 44px;
 	min-width: 0;
 	text-align: center;
-	background: #ffffff;
+	background: var(--tg-theme-bg-color, #ffffff);
 
 	font-size: 1rem;
 	border-radius: 7px;
-	border: 1px solid #ccc;
+	border: 1px solid var(--tg-theme-hint-color, #cccccc);
 	padding: 10px;
 }
 
@@ -283,10 +283,10 @@ input:focus {
 	min-width: 0;
 	height: 44px;
 
-	background: #ffffff;
+	background: var(--tg-theme-bg-color, #ffffff);
 	font-size: 1rem;
 	border-radius: 7px;
-	border: 1px solid #ccc;
+	border: 1px solid var(--tg-theme-hint-color, #cccccc);
 	padding: 10px;
 }
 
@@ -297,12 +297,12 @@ input:focus {
 	padding: 10px;
 	font-size: 1rem;
 	border-radius: 7px;
-	background-color: #2563eb;
-	color: white;
+	background-color: var(--tg-theme-button-color, #2563eb);
+	color: var(--tg-theme-button-text-color, #ffffff);
 }
 
 .new-wishlist-input input[type="submit"]:active {
-	background: #1b57da;
+	background: var(--tg-theme-button-color, #1b57da);
 	box-shadow:
 		inset 1px 1px 4px rgba(0, 0, 0, 0.25),
 		inset -1px -1px 4px rgba(255, 255, 255, 0.25);
@@ -314,7 +314,7 @@ input:focus {
 	flex: 1;
 	overflow-y: auto;
 	padding: 10px;
-	background: #ffffff;
+	background: var(--tg-theme-bg-color, #ffffff);
 	box-shadow:
 		-3px -3px 8px rgba(255, 255, 255, 0.3),
 		3px 3px 8px rgba(0, 0, 0, 0.3);
@@ -329,7 +329,8 @@ input:focus {
 	padding: 0.75rem 0.625rem;
 	margin-bottom: 0.5rem;
 	border-radius: 12px;
-	border: 1px solid #e5e7eb86;
+	border: 1px solid
+		color-mix(in srgb, var(--tg-theme-hint-color, #e5e7eb) 55%, transparent);
 	box-shadow:
 		-2px -2px 4px rgba(255, 255, 255, 0.2),
 		2px 2px 4px rgba(0, 0, 0, 0.2);
@@ -346,7 +347,7 @@ input:focus {
 }
 
 .wishlist-div:active {
-	background-color: #f8f8f8;
+	background-color: var(--tg-theme-secondary-bg-color, #f8f8f8);
 	box-shadow:
 		inset 1px 1px 4px rgba(0, 0, 0, 0.25),
 		inset -1px -1px 4px rgba(255, 255, 255, 0.25);
@@ -398,7 +399,7 @@ input:focus {
 }
 
 .new-wish-form input[type="button"]:active {
-	background: #1b57da;
+	background: var(--tg-theme-button-color, #1b57da);
 	box-shadow:
 		inset 1px 1px 4px rgba(0, 0, 0, 0.25),
 		inset -1px -1px 4px rgba(255, 255, 255, 0.25);
@@ -459,7 +460,7 @@ input:focus {
 	flex-direction: row;
 	gap: 0.5rem;
 	border-radius: 10px;
-	border: 1px solid #808080;
+	border: 1px solid var(--tg-theme-hint-color, #808080);
 	height: 44px;
 	align-items: center;
 	justify-content: space-between;
@@ -490,7 +491,11 @@ input:focus {
 .modal-backdrop {
 	position: absolute;
 	inset: 0;
-	background: rgba(0, 0, 0, 0.5);
+	background: color-mix(
+		in srgb,
+		var(--tg-theme-text-color, #000000) 50%,
+		transparent
+	);
 	border: none;
 	border-radius: 0;
 	padding: 0;
@@ -520,9 +525,9 @@ input:focus {
 .modal-content .end-row button {
 	max-width: 80px;
 
-	background: #ffffff;
-	border: 1px solid #808080;
-	color: #808080;
+	background: var(--tg-theme-bg-color, #ffffff);
+	border: 1px solid var(--tg-theme-hint-color, #808080);
+	color: var(--tg-theme-hint-color, #808080);
 	border-radius: 7px;
 }
 
