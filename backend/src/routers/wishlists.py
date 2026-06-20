@@ -12,6 +12,12 @@ from datetime import datetime, timezone, timedelta
 
 router = APIRouter(prefix="/wishlists", tags=["wishlists"])
 
+NOT_FOUND_ERROR_CODE = 404
+NOT_ACCESS_ERROR_CODE = 403
+
+TOKEN_LENGHT = 16
+TOKEN_DAYS_LIFETIME = 90
+
 
 @router.get("/", response_model=list[WishListResponse])
 async def get_wishlists(
@@ -30,20 +36,22 @@ async def get_wishlists(
 @router.patch("/{wishlist_id}", response_model=WishListResponse)
 async def update_wishlist(
     wishlist_id: int,
-    data: WishListUpdate,
+    updated_data: WishListUpdate,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ) -> WishList:
     wishlist = db.query(WishList).filter(WishList.id == wishlist_id).first()
     if wishlist is None:
-        raise HTTPException(status_code=404, detail="WishList not found")
+        raise HTTPException(
+            status_code=NOT_FOUND_ERROR_CODE, detail="WishList not found"
+        )
     if current_user["id"] != wishlist.owner_id:
-        raise HTTPException(status_code=403, detail="No access")
+        raise HTTPException(status_code=NOT_ACCESS_ERROR_CODE, detail="No access")
 
-    if data.title is not None:
-        wishlist.title = data.title
-    if data.emoji is not None:
-        wishlist.emoji = data.emoji
+    if updated_data.title is not None:
+        wishlist.title = updated_data.title
+    if updated_data.emoji is not None:
+        wishlist.emoji = updated_data.emoji
 
     db.commit()
     db.refresh(wishlist)
@@ -52,13 +60,13 @@ async def update_wishlist(
 
 @router.post("/", response_model=WishListResponse)
 async def create_wishlists(
-    data: WishListCreate,
+    created_data: WishListCreate,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     wishlist = WishList(
-        title=data.title,
-        emoji=data.emoji,
+        title=created_data.title,
+        emoji=created_data.emoji,
         owner_id=current_user["id"],
     )
     db.add(wishlist)
@@ -75,11 +83,13 @@ async def get_wishlist(
 ) -> WishList:
     wishlist = db.query(WishList).filter(WishList.id == wishlist_id).first()
     if wishlist is None:
-        raise HTTPException(status_code=404, detail="WishList not found")
+        raise HTTPException(
+            status_code=NOT_FOUND_ERROR_CODE, detail="WishList not found"
+        )
     if wishlist.owner_id != user["id"]:
-        members_ids = [m.id for m in wishlist.members]
+        members_ids = [member.id for member in wishlist.members]
         if user["id"] not in members_ids:
-            raise HTTPException(status_code=403, detail="Forbidden")
+            raise HTTPException(status_code=NOT_ACCESS_ERROR_CODE, detail="Forbidden")
 
     return wishlist
 
@@ -92,10 +102,12 @@ async def delete_wishlist(
 ) -> dict:
     wishlist = db.query(WishList).filter(WishList.id == wishlist_id).first()
     if wishlist is None:
-        raise HTTPException(status_code=404, detail="WishList not found")
+        raise HTTPException(
+            status_code=NOT_FOUND_ERROR_CODE, detail="WishList not found"
+        )
 
     if current_user["id"] != wishlist.owner_id:
-        raise HTTPException(status_code=403, detail="No access")
+        raise HTTPException(status_code=NOT_ACCESS_ERROR_CODE, detail="No access")
 
     db.query(Wish).filter(Wish.wishlist_id == wishlist_id).delete()
 
@@ -113,14 +125,18 @@ async def kick_member(
 ) -> dict:
     wishlist = db.query(WishList).filter(WishList.id == wishlist_id).first()
     if wishlist is None:
-        raise HTTPException(status_code=404, detail="WishList not found")
+        raise HTTPException(
+            status_code=NOT_FOUND_ERROR_CODE, detail="WishList not found"
+        )
 
     if current_user["id"] != wishlist.owner_id:
-        raise HTTPException(status_code=403, detail="No access")
+        raise HTTPException(status_code=NOT_ACCESS_ERROR_CODE, detail="No access")
 
     kicked_user = db.query(User).filter(User.id == user_id).first()
     if kicked_user is None or kicked_user not in wishlist.members:
-        raise HTTPException(status_code=404, detail="User not found in wishlist")
+        raise HTTPException(
+            status_code=NOT_FOUND_ERROR_CODE, detail="User not found in wishlist"
+        )
 
     wishlist.members.remove(kicked_user)
     db.commit()
@@ -133,12 +149,11 @@ async def create_invite(
     wishlist_id: int,
     db: Session = Depends(get_db),
 ) -> Invite:
-    token = secrets.token_urlsafe(16)
+    token = secrets.token_urlsafe(TOKEN_LENGHT)
     invite = Invite(wishlist_id=wishlist_id, token=token)
 
-    three_months_ago = datetime.now(timezone.utc) - timedelta(days=90)
+    three_months_ago = datetime.now(timezone.utc) - timedelta(days=TOKEN_DAYS_LIFETIME)
     db.query(Invite).filter(Invite.created_at < three_months_ago).delete()
-    db.commit()
 
     db.add(invite)
     db.commit()
@@ -154,23 +169,23 @@ async def get_wishes(
 ) -> list:
     wishlist = db.query(WishList).filter(WishList.id == wishlist_id).first()
     if wishlist is None or (
-        current_user["id"] != wishlist.owner.id
-        and current_user["id"] not in [mem.id for mem in wishlist.members]
+        (current_user["id"] != wishlist.owner.id)
+        and (current_user["id"] not in [mem.id for mem in wishlist.members])
     ):
-        raise HTTPException(status_code=403, detail="No access")
+        raise HTTPException(status_code=NOT_ACCESS_ERROR_CODE, detail="No access")
 
     wishes = db.query(Wish).filter(Wish.wishlist_id == wishlist_id).all()
     return wishes
 
 
 @router.post("/{wishlist_id}/wishes", response_model=WishResponse)
-async def create_wish(data: WishCreate, db: Session = Depends(get_db)) -> Wish:
+async def create_wish(created_data: WishCreate, db: Session = Depends(get_db)) -> Wish:
     wish = Wish(
-        wishlist_id=data.wishlist_id,
-        title=data.title,
-        description=data.description,
-        url=data.url,
-        price=data.price,
+        wishlist_id=created_data.wishlist_id,
+        title=created_data.title,
+        description=created_data.description,
+        url=created_data.url,
+        price=created_data.price,
     )
     db.add(wish)
     db.commit()
