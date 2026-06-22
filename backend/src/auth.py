@@ -1,32 +1,26 @@
-import json
-import hmac
-import hashlib
-from urllib.parse import parse_qsl
+from datetime import timedelta
+
 from fastapi import Header, HTTPException
 from loguru import logger
-from src.config import config
-from src.models import User
-from src.database import SessionLocal
+from telegram_webapp_auth.auth import TelegramAuthenticator, generate_secret_key
+from telegram_webapp_auth.errors import ExpiredInitDataError, InvalidInitDataError
 
-DEBUG = config.get("DEBUG", False)
-BOT_TOKEN = config["BOT_TOKEN"]
+from src.config import config
+from src.database import SessionLocal
+from src.models import User
+
+DEBUG = str(config.get("DEBUG", "false")).lower() == "true"
+BOT_TOKEN = config.get("BOT_TOKEN")
 
 UNAUTHORIZED_ERROR_CODE = 401
 INTERNAL_SERVER_ERROR_CODE = 500
 
-
-class AuthError(Exception):
-    def __init__(
-        self,
-        message: str = "Authentication error",
-        status_code: int = UNAUTHORIZED_ERROR_CODE,
-    ):
-        self.message = message
-        self.status_code = status_code
-        super().__init__(message)
+authenticator = (
+    TelegramAuthenticator(generate_secret_key(BOT_TOKEN)) if BOT_TOKEN else None
+)
 
 
-def _get_debug_user(x_init_data: str):
+def _get_debug_user(x_init_data: str) -> dict:
     try:
         user_id = int(x_init_data)
     except ValueError:
@@ -34,7 +28,7 @@ def _get_debug_user(x_init_data: str):
     return {"id": user_id, "first_name": "Dev", "username": "devuser"}
 
 
-def _register_user(user: dict[str, str]):
+def _register_user(user: dict) -> None:
     db = SessionLocal()
     try:
         db_user = db.query(User).filter(User.id == user["id"]).first()
@@ -52,81 +46,55 @@ def _register_user(user: dict[str, str]):
         db.commit()
     except Exception as error:
         db.rollback()
-        msg = f"Failed to register user with id={user['id']}: {error}"
-        logger.error(msg)
-        raise AuthError(msg, status_code=INTERNAL_SERVER_ERROR_CODE)
+        logger.error(
+            "Failed to register user with id={user_id}: {error}",
+            user_id=user.get("id"),
+            error=str(error),
+        )
+        raise HTTPException(
+            status_code=INTERNAL_SERVER_ERROR_CODE,
+            detail="Failed to register user",
+        )
     finally:
         db.close()
 
 
-def _build_data_check_string(pairs: dict[str, str]) -> str:
-    pairs = pairs.copy()
-    pairs.pop("hash", None)
-    pairs.pop("signature", None)
-    return "\n".join(f"{k}={v}" for k, v in sorted(pairs.items()))
-
-
-def _parse_init_data(init_data: str, bot_token: str) -> dict:
-    pairs = dict(parse_qsl(init_data, keep_blank_values=True))
-
-    received_hash = pairs.get("hash")
-    if not received_hash:
-        raise ValueError("Missing hash")
-
-    data_check_string = _build_data_check_string(pairs)
-    secret_key = hmac.new(b"WebAppData", bot_token.encode(), hashlib.sha256).digest()
-    calculated_hash = hmac.new(
-        secret_key,
-        data_check_string.encode(),
-        hashlib.sha256,
-    ).hexdigest()
-
-    logger.warning(
-        "initData debug | bot={bot} | received_hash={received} | calculated_hash={calculated} | data_check_string={dcs}",
-        bot=f"{bot_token[:8]}...{bot_token[-6:]}",
-        received=received_hash,
-        calculated=calculated_hash,
-        dcs=data_check_string,
-    )
-
-    if not hmac.compare_digest(calculated_hash, received_hash):
-        raise ValueError("Invalid initData")
-
-    user_raw = pairs.get("user")
-    if not user_raw:
-        raise ValueError("Missing user")
-
-    return json.loads(user_raw)
-
-
-def validate_init_data(init_data: str, bot_token: str) -> dict:
-    if not init_data:
-        raise ValueError("init_data is empty")
-    return _parse_init_data(init_data=init_data, bot_token=bot_token)
-
-
 async def get_current_user(x_init_data: str = Header(...)) -> dict:
-    if not BOT_TOKEN:
+    if not BOT_TOKEN or authenticator is None:
         raise HTTPException(
             status_code=INTERNAL_SERVER_ERROR_CODE,
             detail="Bot token not found",
         )
 
-    if DEBUG == "true":
+    if DEBUG:
         user = _get_debug_user(x_init_data)
     else:
         try:
-            user = validate_init_data(x_init_data, BOT_TOKEN)
-        except ValueError as error:
-            logger.warning("Invalid init data: {error}", error=str(error))
+            init_data = authenticator.validate(
+                init_data=x_init_data,
+                expr_in=timedelta(minutes=5),
+            )
+            telegram_user = init_data.user
+            if telegram_user is None:
+                raise HTTPException(
+                    status_code=UNAUTHORIZED_ERROR_CODE,
+                    detail="Unauthorized",
+                )
+            user = {
+                "id": telegram_user.id,
+                "first_name": telegram_user.first_name,
+                "username": telegram_user.username,
+            }
+        except ExpiredInitDataError:
+            raise HTTPException(
+                status_code=UNAUTHORIZED_ERROR_CODE,
+                detail="Telegram init data has expired",
+            )
+        except InvalidInitDataError:
             raise HTTPException(
                 status_code=UNAUTHORIZED_ERROR_CODE,
                 detail="Unauthorized",
             )
 
-    try:
-        _register_user(user)
-    except AuthError as error:
-        raise HTTPException(status_code=error.status_code, detail=error.message)
-
+    _register_user(user)
     return user

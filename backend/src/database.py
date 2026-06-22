@@ -1,5 +1,5 @@
-from sqlalchemy import create_engine
 from fastapi import HTTPException
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from loguru import logger
@@ -7,7 +7,7 @@ from src.config import config
 
 
 class Base(DeclarativeBase):
-    """Base declarative class."""
+    pass
 
 
 bd_path = config.get("BD_PATH", "dancing_ponies.db")

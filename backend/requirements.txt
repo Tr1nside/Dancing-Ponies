@@ -5,3 +5,4 @@ pydantic
 python-dotenv
 dotenv
 loguru
+telegram-webapp-auth
