@@ -21,5 +21,6 @@ def get_db():
         yield db
     except Exception as error:
         logger.error("Database receipt error: {error}", error=error)
+        raise
     finally:
         db.close()
