@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine
+from fastapi import HTTPException
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from loguru import logger
@@ -19,6 +20,8 @@ def get_db():
     db = SessionLocal()
     try:
         yield db
+    except HTTPException:
+        raise
     except Exception as error:
         logger.error("Database receipt error: {error}", error=error)
         raise
