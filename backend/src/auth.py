@@ -81,6 +81,14 @@ def _parse_init_data(init_data: str, bot_token: str) -> dict:
         hashlib.sha256,
     ).hexdigest()
 
+    logger.warning(
+        "initData debug | bot={bot} | received_hash={received} | calculated_hash={calculated} | data_check_string={dcs}",
+        bot=f"{bot_token[:8]}...{bot_token[-6:]}",
+        received=received_hash,
+        calculated=calculated_hash,
+        dcs=data_check_string,
+    )
+
     if not hmac.compare_digest(calculated_hash, received_hash):
         raise ValueError("Invalid initData")
 
