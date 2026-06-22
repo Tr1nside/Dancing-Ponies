@@ -1,10 +1,12 @@
 from pydantic import BaseModel
 from datetime import datetime
+from src.models import ListType
 
 
 class WishListCreate(BaseModel):
     title: str
     emoji: str
+    list_type: ListType = ListType.wishlist
 
 
 class UserResponse(BaseModel):
@@ -19,6 +21,7 @@ class WishListResponse(BaseModel):
     id: int
     title: str
     emoji: str
+    list_type: ListType
     owner_id: int
     owner: UserResponse
     created_at: datetime

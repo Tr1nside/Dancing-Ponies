@@ -2,6 +2,8 @@ import { retrieveLaunchParams } from "@telegram-apps/sdk";
 import { useEffect, useRef } from "react";
 import { BrowserRouter, Route, Routes, useNavigate } from "react-router-dom";
 import InvitePage from "./pages/InvitePage";
+import TodoPage from "./pages/TodoPage";
+import TodosPage from "./pages/TodosPage";
 import WishesPage from "./pages/WishesPage";
 import WishlistsPage from "./pages/WishlistsPage";
 import WishPage from "./pages/WishPage";
@@ -36,7 +38,9 @@ function App() {
 			<Routes>
 				<Route path="/invite/:token" element={<InvitePage />} />
 				<Route path="/" element={<WishlistsPage />} />
-				<Route path="/wishlists/:wishlistId" element={<WishesPage />} />
+				<Route path="/wishlists/:wishlistId/wishes" element={<WishesPage />} />
+				<Route path="/wishlists/:wishlistId/todos" element={<TodosPage />} />
+				<Route path="/todos/:todoId" element={<TodoPage />} />
 				<Route path="/wishes/:wishId" element={<WishPage />} />
 			</Routes>
 		</BrowserRouter>

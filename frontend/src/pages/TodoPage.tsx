@@ -1,20 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-	deleteWish,
-	getWish,
-	handleWishComplete,
-	updateWish,
-} from "../api/wishes";
+	deleteTodo,
+	getTodo,
+	handleTodoComplete,
+	updateTodo,
+} from "../api/todos";
 import BackButton from "../components/BackButton";
 import { DropdownMenu, type MenuItem } from "../components/DropdownMenu";
-import type { Wish } from "../types";
-
-function normalizeUrl(url: string): string {
-	if (!url) return "";
-	if (url.startsWith("http://") || url.startsWith("https://")) return url;
-	return `https://${url}`;
-}
+import type { Todo } from "../types";
 
 function EditableField({
 	isEditing,
@@ -59,18 +53,16 @@ function EditableField({
 	);
 }
 
-export default function WishPage() {
+export default function TodoPage() {
 	const navigate = useNavigate();
-	const { wishId } = useParams();
+	const { todoId } = useParams();
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [wish, setWish] = useState<Wish | null>(null);
+	const [todo, setTodo] = useState<Todo | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [editData, setEditData] = useState({
 		title: "",
 		description: "",
-		price: 0,
-		url: "",
 	});
 
 	const updateField = (
@@ -81,35 +73,33 @@ export default function WishPage() {
 	};
 
 	const handleComplete = async () => {
-		if (wish === null) return;
+		if (todo === null) return;
 
-		const updated = { ...wish, is_completed: !wish.is_completed };
-		setWish(updated); // оптимистичное обновление
+		const updated = { ...todo, is_completed: !todo.is_completed };
+		setTodo(updated); // оптимистичное обновление
 
 		try {
-			await handleWishComplete(wish.id, { is_completed: updated.is_completed });
+			await handleTodoComplete(todo.id, { is_completed: updated.is_completed });
 		} catch (e) {
-			setWish(wish); // откат - возвращаем старый объект
+			setTodo(todo); // откат - возвращаем старый объект
 			setError(e instanceof Error ? e.message : "Error");
 		}
 	};
 	const handleEdit = () => {
-		if (!isEditing && wish != null) {
+		if (!isEditing && todo != null) {
 			setEditData({
-				title: wish.title,
-				description: wish.description ?? "",
-				price: wish.price ?? 0,
-				url: wish.url ?? "",
+				title: todo.title,
+				description: todo.description ?? "",
 			});
 		}
 		setIsEditing(!isEditing);
 	};
 
 	const handleSave = async () => {
-		if (wish === null) return;
+		if (todo === null) return;
 		try {
-			const updated = await updateWish(wish.id, editData);
-			setWish(updated);
+			const updated = await updateTodo(todo.id, editData);
+			setTodo(updated);
 			setIsEditing(false);
 		} catch (e) {
 			setError(e instanceof Error ? e.message : "Ошибка");
@@ -117,18 +107,18 @@ export default function WishPage() {
 	};
 
 	const handleDeleteWish = async () => {
-		if (wishId === undefined) {
+		if (todoId === undefined) {
 			setError("Wishlist id is NaN");
 			return;
 		}
 
-		const wishIdInt = Number(wishId);
+		const wishIdInt = Number(todoId);
 		if (Number.isNaN(wishIdInt)) {
 			setError("Wishlist id is NaN");
 		}
 		try {
-			await deleteWish(wishIdInt);
-			navigate(`/wishlists/${wish?.wishlist_id}`);
+			await deleteTodo(wishIdInt);
+			navigate(`/wishlists/${todo?.todolist_id}`);
 		} catch (e) {
 			setError(e instanceof Error ? e.message : "Undefind error");
 			return;
@@ -136,15 +126,13 @@ export default function WishPage() {
 	};
 
 	useEffect(() => {
-		if (wishId) {
-			getWish(Number(wishId))
+		if (todoId) {
+			getTodo(Number(todoId))
 				.then((w) => {
-					setWish(w);
+					setTodo(w);
 					setEditData({
 						title: w.title,
 						description: w.description ?? "",
-						price: w.price ?? 0,
-						url: w.url ?? "",
 					});
 				})
 				.catch((e) => setError(e.message))
@@ -152,24 +140,24 @@ export default function WishPage() {
 					setLoading(false);
 				});
 		}
-	}, [wishId]);
+	}, [todoId]);
 
 	if (loading) return <div>Загрузка...</div>;
 
 	if (error) return <div>Ошибка: {error}</div>;
 
-	if (wish == null) return <div>Wish not find</div>;
+	if (todo == null) return <div>Wish not find</div>;
 
 	return (
 		<div className="page-div">
 			<header className="wish-header">
 				<BackButton
-					onClick={() => navigate(`/wishlists/${wish?.wishlist_id}`)}
+					onClick={() => navigate(`/wishlists/${todo?.todolist_id}`)}
 				/>
 				<EditableField
 					isEditing={isEditing}
 					value={editData.title}
-					display={<h1>{wish.title}</h1>}
+					display={<h1>{todo.title}</h1>}
 					type="text"
 					onChange={(e) => updateField("title", e.target.value)}
 					placeholder="Название"
@@ -185,52 +173,25 @@ export default function WishPage() {
 				/>
 			</header>
 			<div className="wish-body">
-				<p className="exp">Wish</p>
+				<p className="exp">Todo</p>
 
 				<EditableField
 					isEditing={isEditing}
 					value={editData.description}
-					display={wish.description && <p>{wish.description}</p>}
+					display={todo.description && <p>{todo.description}</p>}
 					type="text"
 					onChange={(e) => updateField("description", e.target.value)}
 					placeholder="Description"
 					multiline={true}
 				/>
 
-				<EditableField
-					isEditing={isEditing}
-					value={editData.price}
-					display={wish.price && <p>{wish.price} ₽</p>}
-					type="number"
-					onChange={(e) => updateField("price", Number(e.target.value))}
-					placeholder="Цена"
-				/>
-
 				<div className="wish-btns">
-					<EditableField
-						isEditing={isEditing}
-						value={editData.url}
-						display={
-							wish.url && (
-								<button
-									type="button"
-									onClick={() => window.open(wish.url ?? undefined, "_blank")}
-									className="btn-primary"
-								>
-									Buy
-								</button>
-							)
-						}
-						type="url"
-						onChange={(e) => updateField("url", normalizeUrl(e.target.value))}
-						placeholder="Link"
-					/>
 					<button
 						onClick={handleComplete}
 						className="btn-secondary"
 						type="button"
 					>
-						{wish.is_completed ? "Done" : "Mark as done"}
+						{todo.is_completed ? "Done" : "Mark as done"}
 					</button>
 				</div>
 				{isEditing && (

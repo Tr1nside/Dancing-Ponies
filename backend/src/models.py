@@ -1,8 +1,14 @@
-from sqlalchemy import Table, Column
+from sqlalchemy import Table, Column, Enum as SAEnum
 from sqlalchemy import ForeignKey, String, Integer, DateTime, Boolean
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from src.database import Base
 from datetime import datetime, timezone
+import enum
+
+
+class ListType(str, enum.Enum):
+    wishlist = "wishlist"
+    todolist = "todolist"
 
 
 class User(Base):
@@ -26,6 +32,9 @@ class WishList(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[str] = mapped_column(String)
+    list_type: Mapped[ListType] = mapped_column(
+        SAEnum(ListType), default=ListType.wishlist
+    )
 
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     owner: Mapped[User] = relationship("User", foreign_keys=[owner_id])
@@ -33,11 +42,13 @@ class WishList(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=lambda: datetime.now(timezone.utc)
     )
+
     emoji: Mapped[str] = mapped_column(String(1))
 
 
 class Wish(Base):
     __tablename__ = "wish"
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     wishlist_id: Mapped[int] = mapped_column(ForeignKey("wishlists.id"))
     wishlist: Mapped[WishList] = relationship("WishList")
@@ -46,6 +57,19 @@ class Wish(Base):
     url: Mapped[str | None] = mapped_column(String, nullable=True)
     price: Mapped[int | None] = mapped_column(Integer, nullable=True)
     is_completed: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
+class TodoItem(Base):
+    __tablename__ = "todo_items"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    todolist_id: Mapped[int] = mapped_column(ForeignKey("wishlists.id"))
+    todolist: Mapped[WishList] = relationship("WishList")
+    title: Mapped[str] = mapped_column(String)
+    description: Mapped[str | None] = mapped_column(String, nullable=True)
+    is_completed: Mapped[bool] = mapped_column(Boolean, default=False)
+    due_date: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    priority: Mapped[int] = mapped_column(Integer, default=0)
 
 
 class Invite(Base):

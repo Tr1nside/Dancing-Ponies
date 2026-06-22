@@ -3,10 +3,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.database import get_db
 from src.auth import get_current_user
-from src.models import WishList, User, Invite, Wish
+from src.models import WishList, User, Invite, Wish, TodoItem, ListType
 from src.schemas.wishlists import WishListCreate, WishListResponse, WishListUpdate
 from src.schemas.invites import InviteResponse
 from src.schemas.wishes import WishCreate, WishResponse
+from src.schemas.todos import TodoItemCreate, TodoItemResponse
 import secrets
 from datetime import datetime, timezone, timedelta
 
@@ -14,9 +15,18 @@ router = APIRouter(prefix="/wishlists", tags=["wishlists"])
 
 NOT_FOUND_ERROR_CODE = 404
 NOT_ACCESS_ERROR_CODE = 403
+WRONG_LIST_TYPE_CODE = 422
 
 TOKEN_LENGHT = 16
 TOKEN_DAYS_LIFETIME = 90
+
+
+def _check_member(user_id: int, wishlist: WishList) -> bool:
+    if wishlist.owner_id == user_id:
+        return True
+    if user_id in [m.id for m in wishlist.members]:
+        return True
+    return False
 
 
 @router.get("/", response_model=list[WishListResponse])
@@ -31,6 +41,40 @@ async def get_wishlists(
         )
         .all()
     )
+
+
+@router.post("/", response_model=WishListResponse)
+async def create_wishlist(
+    created_data: WishListCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    wishlist = WishList(
+        title=created_data.title,
+        emoji=created_data.emoji,
+        list_type=created_data.list_type,
+        owner_id=current_user["id"],
+    )
+    db.add(wishlist)
+    db.commit()
+    db.refresh(wishlist)
+    return wishlist
+
+
+@router.get("/{wishlist_id}", response_model=WishListResponse)
+async def get_wishlist(
+    wishlist_id: int,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),
+) -> WishList:
+    wishlist = db.query(WishList).filter(WishList.id == wishlist_id).first()
+    if wishlist is None:
+        raise HTTPException(
+            status_code=NOT_FOUND_ERROR_CODE, detail="WishList not found"
+        )
+    if not _check_member(user["id"], wishlist):
+        raise HTTPException(status_code=NOT_ACCESS_ERROR_CODE, detail="Forbidden")
+    return wishlist
 
 
 @router.patch("/{wishlist_id}", response_model=WishListResponse)
@@ -58,42 +102,6 @@ async def update_wishlist(
     return wishlist
 
 
-@router.post("/", response_model=WishListResponse)
-async def create_wishlists(
-    created_data: WishListCreate,
-    db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
-):
-    wishlist = WishList(
-        title=created_data.title,
-        emoji=created_data.emoji,
-        owner_id=current_user["id"],
-    )
-    db.add(wishlist)
-    db.commit()
-    db.refresh(wishlist)
-    return wishlist
-
-
-@router.get("/{wishlist_id}", response_model=WishListResponse)
-async def get_wishlist(
-    wishlist_id: int,
-    db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user),
-) -> WishList:
-    wishlist = db.query(WishList).filter(WishList.id == wishlist_id).first()
-    if wishlist is None:
-        raise HTTPException(
-            status_code=NOT_FOUND_ERROR_CODE, detail="WishList not found"
-        )
-    if wishlist.owner_id != user["id"]:
-        members_ids = [member.id for member in wishlist.members]
-        if user["id"] not in members_ids:
-            raise HTTPException(status_code=NOT_ACCESS_ERROR_CODE, detail="Forbidden")
-
-    return wishlist
-
-
 @router.delete("/{wishlist_id}", response_model=dict)
 async def delete_wishlist(
     wishlist_id: int,
@@ -105,12 +113,11 @@ async def delete_wishlist(
         raise HTTPException(
             status_code=NOT_FOUND_ERROR_CODE, detail="WishList not found"
         )
-
     if current_user["id"] != wishlist.owner_id:
         raise HTTPException(status_code=NOT_ACCESS_ERROR_CODE, detail="No access")
 
     db.query(Wish).filter(Wish.wishlist_id == wishlist_id).delete()
-
+    db.query(TodoItem).filter(TodoItem.todolist_id == wishlist_id).delete()
     db.delete(wishlist)
     db.commit()
     return {"deleted_id": wishlist.id}
@@ -128,7 +135,6 @@ async def kick_member(
         raise HTTPException(
             status_code=NOT_FOUND_ERROR_CODE, detail="WishList not found"
         )
-
     if current_user["id"] != wishlist.owner_id:
         raise HTTPException(status_code=NOT_ACCESS_ERROR_CODE, detail="No access")
 
@@ -140,7 +146,6 @@ async def kick_member(
 
     wishlist.members.remove(kicked_user)
     db.commit()
-
     return {"wishlist_id": wishlist.id, "kicked_user": kicked_user.id}
 
 
@@ -168,20 +173,31 @@ async def get_wishes(
     current_user: dict = Depends(get_current_user),
 ) -> list:
     wishlist = db.query(WishList).filter(WishList.id == wishlist_id).first()
-    if wishlist is None or (
-        (current_user["id"] != wishlist.owner.id)
-        and (current_user["id"] not in [mem.id for mem in wishlist.members])
-    ):
+    if wishlist is None or not _check_member(current_user["id"], wishlist):
         raise HTTPException(status_code=NOT_ACCESS_ERROR_CODE, detail="No access")
-
-    wishes = db.query(Wish).filter(Wish.wishlist_id == wishlist_id).all()
-    return wishes
+    if wishlist.list_type != ListType.wishlist:
+        raise HTTPException(
+            status_code=WRONG_LIST_TYPE_CODE, detail="This list is not a wishlist"
+        )
+    return db.query(Wish).filter(Wish.wishlist_id == wishlist_id).all()
 
 
 @router.post("/{wishlist_id}/wishes", response_model=WishResponse)
-async def create_wish(created_data: WishCreate, db: Session = Depends(get_db)) -> Wish:
+async def create_wish(
+    wishlist_id: int,
+    created_data: WishCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+) -> Wish:
+    wishlist = db.query(WishList).filter(WishList.id == wishlist_id).first()
+    if wishlist is None or not _check_member(current_user["id"], wishlist):
+        raise HTTPException(status_code=NOT_ACCESS_ERROR_CODE, detail="No access")
+    if wishlist.list_type != ListType.wishlist:
+        raise HTTPException(
+            status_code=WRONG_LIST_TYPE_CODE, detail="This list is not a wishlist"
+        )
     wish = Wish(
-        wishlist_id=created_data.wishlist_id,
+        wishlist_id=wishlist_id,
         title=created_data.title,
         description=created_data.description,
         url=created_data.url,
@@ -191,3 +207,46 @@ async def create_wish(created_data: WishCreate, db: Session = Depends(get_db)) -
     db.commit()
     db.refresh(wish)
     return wish
+
+
+@router.get("/{wishlist_id}/todos", response_model=list[TodoItemResponse])
+async def get_todos(
+    wishlist_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+) -> list:
+    wishlist = db.query(WishList).filter(WishList.id == wishlist_id).first()
+    if wishlist is None or not _check_member(current_user["id"], wishlist):
+        raise HTTPException(status_code=NOT_ACCESS_ERROR_CODE, detail="No access")
+    if wishlist.list_type != ListType.todolist:
+        raise HTTPException(
+            status_code=WRONG_LIST_TYPE_CODE, detail="This list is not a todolist"
+        )
+    return db.query(TodoItem).filter(TodoItem.todolist_id == wishlist_id).all()
+
+
+@router.post("/{wishlist_id}/todos", response_model=TodoItemResponse)
+async def create_todo(
+    wishlist_id: int,
+    created_data: TodoItemCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+) -> TodoItem:
+    wishlist = db.query(WishList).filter(WishList.id == wishlist_id).first()
+    if wishlist is None or not _check_member(current_user["id"], wishlist):
+        raise HTTPException(status_code=NOT_ACCESS_ERROR_CODE, detail="No access")
+    if wishlist.list_type != ListType.todolist:
+        raise HTTPException(
+            status_code=WRONG_LIST_TYPE_CODE, detail="This list is not a todolist"
+        )
+    item = TodoItem(
+        todolist_id=wishlist_id,
+        title=created_data.title,
+        description=created_data.description,
+        due_date=created_data.due_date,
+        priority=created_data.priority,
+    )
+    db.add(item)
+    db.commit()
+    db.refresh(item)
+    return item

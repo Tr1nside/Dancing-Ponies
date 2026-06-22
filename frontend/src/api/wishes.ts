@@ -1,26 +1,32 @@
-import type { handleWishCompleteRequest, Wish } from "../types";
+import type {
+	HandleWishCompleteRequest,
+	Wish,
+	WishCreatePayload,
+	WishUpdatePayload,
+} from "../types";
 import client from "./client";
 
-export const getWishes = (wishlist_id: number) =>
-	client.get<Wish[]>(`/wishlists/${wishlist_id}/wishes`).then((r) => r.data);
+export const getWishes = (wishlistId: number): Promise<Wish[]> =>
+	client.get(`/wishlists/${wishlistId}/wishes`).then((r) => r.data);
 
-export const getWish = (wish_id: number) =>
-	client.get<Wish>(`/wishes/${wish_id}`).then((r) => r.data);
+export const getWish = (wishId: number): Promise<Wish> =>
+	client.get(`/wishes/${wishId}`).then((r) => r.data);
 
-export const createWish = (
-	data: Pick<Wish, "title" | "price" | "url" | "wishlist_id">,
-) =>
+export const createWish = (data: WishCreatePayload): Promise<Wish> =>
 	client
 		.post(`/wishlists/${data.wishlist_id}/wishes`, data)
 		.then((r) => r.data);
 
-export const updateWish = (id: number, data: Partial<Wish>) =>
-	client.patch(`/wishes/${id}`, data).then((r) => r.data);
+export const updateWish = (
+	id: number,
+	data: WishUpdatePayload,
+): Promise<Wish> => client.patch(`/wishes/${id}`, data).then((r) => r.data);
 
 export const handleWishComplete = (
-	wish_id: number,
-	data: handleWishCompleteRequest,
-) => client.patch(`/wishes/${wish_id}/complete`, data).then((r) => r.data);
+	wishId: number,
+	data: HandleWishCompleteRequest,
+): Promise<{ completed_id: number }> =>
+	client.patch(`/wishes/${wishId}/complete`, data).then((r) => r.data);
 
-export const deleteWish = (wish_id: number) =>
-	client.delete(`/wishes/${wish_id}`).then((r) => r.data);
+export const deleteWish = (wishId: number): Promise<{ deleted_id: number }> =>
+	client.delete(`/wishes/${wishId}`).then((r) => r.data);

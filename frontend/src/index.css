@@ -297,6 +297,23 @@ input:focus {
 	padding: 10px;
 }
 
+#list-type-input {
+	min-width: 30px;
+	height: 44px;
+
+	background: var(--tg-theme-bg-color, #ffffff);
+	font-size: 1rem;
+	border-radius: 5px;
+	border: 1px solid var(--tg-theme-hint-color, #cccccc);
+	padding: 10px;
+}
+
+#list-type-input option {
+	background: var(--tg-theme-bg-color, #ffffff);
+	color: var(--tg-theme-text-color, #000000);
+	font-size: 1rem;
+}
+
 /* Кнопка — только по контенту */
 .new-wishlist-input input[type="submit"] {
 	flex: 0 0 auto;

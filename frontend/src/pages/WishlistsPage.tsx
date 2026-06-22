@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { createWishlist, deleteWishlist, getWishlists } from "../api/wishlists";
 import { DropdownMenu, type MenuItem } from "../components/DropdownMenu";
-import type { Wishlist } from "../types";
+import type { ListType, Wishlist } from "../types";
 
 export default function WishlistsPage() {
 	const [wishlists, setWishlists] = useState<Wishlist[]>([]);
@@ -11,6 +11,7 @@ export default function WishlistsPage() {
 	const [error, setError] = useState<string | null>(null);
 	const [title, setTitle] = useState<string>("");
 	const [emoji, setEmoji] = useState<string>("");
+	const [listType, setListType] = useState<ListType>("wishlist");
 
 	let currentUserId = 0;
 	try {
@@ -35,10 +36,15 @@ export default function WishlistsPage() {
 
 		const emojiToSend = emoji || "⬛";
 		try {
-			const newWishlist = await createWishlist({ title, emoji: emojiToSend });
-			setWishlists([...wishlists, newWishlist]); // добавляем в список без перезагрузки
-			setTitle(""); // очищаем форму
+			const newWishlist = await createWishlist({
+				title,
+				emoji: emojiToSend,
+				list_type: listType,
+			});
+			setWishlists([...wishlists, newWishlist]);
+			setTitle("");
 			setEmoji("");
+			setListType("wishlist");
 		} catch (e) {
 			setError(e instanceof Error ? e.message : "Error");
 		}
@@ -77,12 +83,30 @@ export default function WishlistsPage() {
 						setEmoji(e.target.value);
 					}}
 				/>
+				<select 
+					id="list-type-input"
+					value={listType}
+					onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+						setListType(e.target.value as ListType)
+					}
+				>
+					<option value="wishlist">wishlist</option>
+					<option value="todolist">todolist</option>
+				</select>
 				<input type="submit" value="Create" onClick={handleCreate} />
 			</div>
 			<div className="cards">
 				<p className="exp">My Wishlists</p>
 				{wishlists.map((w) => (
-					<Link key={w.id} className="wishlist-div" to={`/wishlists/${w.id}`}>
+					<Link
+						key={w.id}
+						className="wishlist-div"
+						to={
+							w.list_type === "wishlist"
+								? `/wishlists/${w.id}/wishes`
+								: `/wishlists/${w.id}/todos`
+						}
+					>
 						<span className="wishlist-left">
 							<p className="emoji-icon">{w.emoji}</p> {w.title}
 						</span>

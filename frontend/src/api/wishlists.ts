@@ -1,39 +1,55 @@
-import type { Wishlist } from "../types";
+import type { InviteResponse, ListType, Wishlist } from "../types";
 import client from "./client";
 
-export const getWishlists = () =>
-	client.get<Wishlist[]>("/wishlists/").then((r) => r.data);
+export type CreateWishlistPayload = {
+	title: string;
+	emoji: string;
+	list_type?: ListType;
+};
 
-export const getWishlist = (wishlist_id: number) =>
-	client.get<Wishlist>(`/wishlists/${wishlist_id}`).then((r) => r.data);
+export type UpdateWishlistPayload = {
+	title?: string;
+	emoji?: string;
+};
 
-export const createWishlist = (data: Pick<Wishlist, "title" | "emoji">) =>
-	client.post<Wishlist>("/wishlists/", data).then((r) => r.data);
+export const getWishlists = (): Promise<Wishlist[]> =>
+	client.get("/wishlists/").then((r) => r.data);
 
-export const deleteWishlist = (id: number) =>
+export const getWishlist = (wishlistId: number): Promise<Wishlist> =>
+	client.get(`/wishlists/${wishlistId}`).then((r) => r.data);
+
+export const createWishlist = (
+	data: CreateWishlistPayload,
+): Promise<Wishlist> => client.post("/wishlists/", data).then((r) => r.data);
+
+export const deleteWishlist = (id: number): Promise<{ deleted_id: number }> =>
 	client.delete(`/wishlists/${id}`).then((r) => r.data);
 
-export async function createInvite(wishlistId: number): Promise<string> {
-	const res = await client.post(`/wishlists/${wishlistId}/invite`);
-	const token: string = res.data.token;
+export const createInvite = async (wishlistId: number): Promise<string> => {
+	const res = await client.post<InviteResponse>(
+		`/wishlists/${wishlistId}/invite`,
+	);
+	const token = res.data.token;
 	return `https://t.me/${import.meta.env.VITE_BOT_USERNAME}?startapp=${token}`;
-}
+};
 
 export const acceptInvite = async (token: string): Promise<number> => {
-	const response = await client.post(`/invites/${token}/accept`);
+	const response = await client.post<{ wishlist_id: number }>(
+		`/invites/${token}/accept`,
+	);
 	return response.data.wishlist_id;
 };
 
-export async function kickMember(
+export const kickMember = async (
 	wishlistId: number,
 	userId: number,
-): Promise<void> {
+): Promise<void> => {
 	await client.delete(`/wishlists/${wishlistId}/members/${userId}`);
-}
+};
 
 export const updateWishlist = async (
 	id: number,
-	data: { title?: string; emoji?: string },
+	data: UpdateWishlistPayload,
 ): Promise<Wishlist> => {
 	const response = await client.patch(`/wishlists/${id}`, data);
 	return response.data;
