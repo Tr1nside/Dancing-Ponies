@@ -23,12 +23,12 @@ allowed_hosts = [back_domain] if back_domain else []
 #     allowed_hosts=allowed_hosts,
 # )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=origins,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 requests_by_ip = defaultdict(deque)
 LIMIT = 100
