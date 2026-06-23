@@ -44,31 +44,12 @@ app.include_router(todos.router)
 
 
 @app.middleware("http")
-async def rate_limit_and_security_headers(request: Request, call_next):
-    ip = request.client.host if request.client else "unknown"
-    now = time.time()
-    bucket = requests_by_ip[ip]
-
-    while bucket and now - bucket[0] > WINDOW:
-        bucket.popleft()
-
-    if len(bucket) >= LIMIT:
-        return JSONResponse(
-            status_code=TOO_MANY_REQUEST_ERROR_CODE,
-            content={"detail": "Too Many Requests"},
-        )
-
-    bucket.append(now)
-
-    response = await call_next(request)
-    response.headers["X-Frame-Options"] = "DENY"
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
-    response.headers["Strict-Transport-Security"] = (
-        "max-age=31536000; includeSubDomains"
-    )
-    return response
+async def debug_request(request: Request, call_next):
+    print("ORIGIN:", request.headers.get("origin"))
+    print("HOST:", request.headers.get("host"))
+    print("ACRM:", request.headers.get("access-control-request-method"))
+    print("ACRH:", request.headers.get("access-control-request-headers"))
+    return await call_next(request)
 
 
 @app.get("/")
