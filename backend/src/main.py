@@ -25,7 +25,7 @@ allowed_hosts = [back_domain] if back_domain else []
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
