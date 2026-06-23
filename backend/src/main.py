@@ -18,10 +18,10 @@ back_domain = config.get("BACK_DOMAIN")
 origins = [front_domain] if front_domain else []
 allowed_hosts = [back_domain] if back_domain else []
 
-app.add_middleware(
-    TrustedHostMiddleware,
-    allowed_hosts=allowed_hosts,
-)
+# app.add_middleware(
+#     TrustedHostMiddleware,
+#     allowed_hosts=allowed_hosts,
+# )
 
 app.add_middleware(
     CORSMiddleware,
