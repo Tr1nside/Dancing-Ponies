@@ -152,7 +152,7 @@ export default function TodoPage() {
 		<div className="page-div">
 			<header className="wish-header">
 				<BackButton
-					onClick={() => navigate(`/wishlists/${todo?.todolist_id}`)}
+					onClick={() => navigate(`/wishlists/${todo?.todolist_id}/todos`)}
 				/>
 				<EditableField
 					isEditing={isEditing}

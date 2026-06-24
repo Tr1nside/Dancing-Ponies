@@ -164,7 +164,7 @@ export default function WishPage() {
 		<div className="page-div">
 			<header className="wish-header">
 				<BackButton
-					onClick={() => navigate(`/wishlists/${wish?.wishlist_id}`)}
+					onClick={() => navigate(`/wishlists/${wish?.wishlist_id}/wishes`)}
 				/>
 				<EditableField
 					isEditing={isEditing}
