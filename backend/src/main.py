@@ -4,30 +4,17 @@ import time
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
 from src.routers import invites, wishes, wishlists, todos
 from src.database import engine, Base
-from src.config import config
 
 app = FastAPI()
 
-front_domain = config.get("FRONT_DOMEN")
-back_domain = config.get("BACK_DOMEN")
-
-origins = [front_domain] if front_domain else []
-allowed_hosts = [back_domain] if back_domain else []
-
-app.add_middleware(
-    TrustedHostMiddleware,
-    allowed_hosts=allowed_hosts,
-)
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 requests_by_ip = defaultdict(deque)
@@ -59,13 +46,6 @@ async def rate_limit_and_security_headers(request: Request, call_next):
     bucket.append(now)
 
     response = await call_next(request)
-    response.headers["X-Frame-Options"] = "DENY"
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
-    response.headers["Strict-Transport-Security"] = (
-        "max-age=31536000; includeSubDomains"
-    )
     return response
 
 
