@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from src.database import get_db
@@ -7,13 +6,13 @@ from src.auth import get_current_user
 from src.models import Reaction
 from src.schemas.reactions import ReactionCreate, ReactionResponse
 
-router = APIRouter(prefix="/reactions", tags=["reactions"])
+router = APIRouter(tags=["reactions"])
 
 NOT_FOUND_STATUS = 404
 FORBIDDEN_STATUS = 403
 
 
-@router.get("/", response_model=list[ReactionResponse])
+@router.get("/reactions", response_model=list[ReactionResponse])
 async def list_reactions(
     target_type: str = Query(...),
     target_id: int = Query(...),
@@ -27,7 +26,7 @@ async def list_reactions(
     )
 
 
-@router.get("/all", response_model=list[ReactionResponse])
+@router.get("/reactions/all", response_model=list[ReactionResponse])
 async def list_reactions_for_many(
     target_type: str = Query(...),
     target_ids: str = Query(...),
@@ -44,7 +43,7 @@ async def list_reactions_for_many(
     )
 
 
-@router.post("/", response_model=ReactionResponse)
+@router.post("/reactions", response_model=ReactionResponse)
 async def upsert_reaction(
     reaction_data: ReactionCreate,
     db: Session = Depends(get_db),
@@ -78,7 +77,7 @@ async def upsert_reaction(
     return reaction
 
 
-@router.delete("/{reaction_id}")
+@router.delete("/reactions/{reaction_id}")
 async def delete_reaction(
     reaction_id: int,
     db: Session = Depends(get_db),

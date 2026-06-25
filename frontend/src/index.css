@@ -125,7 +125,8 @@ header h1 {
 .wishcard-main {
 	display: flex;
 	align-items: center;
-	gap: 1em;
+	justify-content: space-between;
+	/* gap: 1em; */
 	width: 100%;
 }
 
