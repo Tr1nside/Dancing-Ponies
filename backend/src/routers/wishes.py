@@ -42,7 +42,7 @@ def _resize_image(image: Image.Image) -> Image.Image:
     else:
         new_width = MAX_IMAGE_SIZE
         new_height = int(height * (MAX_IMAGE_SIZE / width))
-    return image.resize((new_width, new_height), Image.LANCZOS)
+    return image.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
 
 def _save_photo(photo: UploadFile) -> str:
