@@ -35,6 +35,7 @@ export default function WishesPage() {
 		}
 	})();
 	const isOwner = wishlist?.owner_id === currentUserId;
+	const totalPrice = wishes.reduce((sum, w) => sum + (w.price ?? 0), 0);
 
 	const handleSave = async () => {
 		if (!wishlistId) return;
@@ -241,7 +242,12 @@ export default function WishesPage() {
 					<input type="button" onClick={handleCreate} value="Create" />
 				</div>
 
-				<p className="exp">My Wishes</p>
+				<div style={{ display: "flex", alignItems: "center" }}>
+					<p className="exp">My Wishes</p>
+					<p className="exp" style={{ marginLeft: "auto" }}>
+						{totalPrice}
+					</p>
+				</div>
 				{wishes.map((w) => (
 					<WishCard
 						key={w.id}
