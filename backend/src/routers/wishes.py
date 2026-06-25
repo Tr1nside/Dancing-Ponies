@@ -34,15 +34,18 @@ def _check_acces(current_user: dict, wish: Wish):
 
 def _resize_image(image: Image.Image) -> Image.Image:
     width, height = image.size
-    if width <= MAX_IMAGE_SIZE and height <= MAX_IMAGE_SIZE:
-        return image
-    if width < height:
-        new_height = MAX_IMAGE_SIZE
-        new_width = int(width * (MAX_IMAGE_SIZE / height))
-    else:
-        new_width = MAX_IMAGE_SIZE
-        new_height = int(height * (MAX_IMAGE_SIZE / width))
-    return image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+    if width > MAX_IMAGE_SIZE or height > MAX_IMAGE_SIZE:
+        if width < height:
+            new_width = MAX_IMAGE_SIZE
+            new_height = int(height * (MAX_IMAGE_SIZE / width))
+        else:
+            new_height = MAX_IMAGE_SIZE
+            new_width = int(width * (MAX_IMAGE_SIZE / height))
+        image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+    min_side = min(image.size)
+    left = (image.size[0] - min_side) // 2
+    top = (image.size[1] - min_side) // 2
+    return image.crop((left, top, left + min_side, top + min_side))
 
 
 def _save_photo(photo: UploadFile) -> str:

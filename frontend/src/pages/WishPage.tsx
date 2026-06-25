@@ -76,17 +76,20 @@ export default function WishPage() {
 	});
 	const [editPhoto, setEditPhoto] = useState<File | null>(null);
 
-	const handlePaste = (e: React.ClipboardEvent) => {
-		const items = e.clipboardData.items;
-		for (const item of items) {
-			if (item.type.startsWith("image/")) {
-				const file = item.getAsFile();
-				if (file) {
+	const handlePasteFromClipboard = async () => {
+		try {
+			const items = await navigator.clipboard.read();
+			for (const item of items) {
+				const imageType = item.types.find((t) => t.startsWith("image/"));
+				if (imageType) {
+					const blob = await item.getType(imageType);
+					const file = new File([blob], "clipboard.png", { type: imageType });
 					setEditPhoto(file);
-					e.preventDefault();
 					return;
 				}
 			}
+		} catch {
+			// clipboard access denied or no image
 		}
 	};
 
@@ -260,7 +263,7 @@ export default function WishPage() {
 					</button>
 				</div>
 				{isEditing && (
-					<div className="wish-btns" onPaste={handlePaste}>
+					<div className="wish-btns">
 						<label className="btn-secondary">
 							Загрузить фото
 							<input
@@ -273,10 +276,16 @@ export default function WishPage() {
 								style={{ display: "none" }}
 							/>
 						</label>
+						<button
+							type="button"
+							className="btn-secondary"
+							onClick={handlePasteFromClipboard}
+						>
+							Из буфера
+						</button>
 						{editPhoto && (
 							<span className="photo-filename">{editPhoto.name}</span>
 						)}
-						<span className="photo-hint">или вставьте из буфера (Ctrl+V)</span>
 					</div>
 				)}
 				{isEditing && (
