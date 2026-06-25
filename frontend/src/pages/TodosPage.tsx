@@ -1,6 +1,7 @@
 import { retrieveLaunchParams } from "@telegram-apps/sdk";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { getReactionsForMany } from "../api/reactions";
 import {
 	createTodo,
 	deleteTodo,
@@ -12,7 +13,7 @@ import BackButton from "../components/BackButton";
 import { DropdownMenu, type MenuItem } from "../components/DropdownMenu";
 import MembersPanel from "../components/MembersPanel";
 import TodoCard from "../components/TodoCard";
-import type { Todo, Wishlist } from "../types";
+import type { Reaction, Todo, Wishlist } from "../types";
 
 export default function TodosPage() {
 	const navigate = useNavigate();
@@ -122,7 +123,27 @@ export default function TodosPage() {
 	useEffect(() => {
 		if (wishlistId) {
 			getTodos(Number(wishlistId))
-				.then(setTodos)
+				.then((items) => {
+					setTodos(items);
+					const ids = items.map((t) => t.id);
+					if (ids.length > 0) {
+						getReactionsForMany("todo", ids)
+							.then((reactions: Reaction[]) => {
+								const byTarget: Record<number, Reaction[]> = {};
+								for (const r of reactions) {
+									byTarget[r.target_id] = byTarget[r.target_id] ?? [];
+									byTarget[r.target_id].push(r);
+								}
+								setTodos((prev) =>
+									prev.map((t) => ({
+										...t,
+										reactions: byTarget[t.id] ?? [],
+									})),
+								);
+							})
+							.catch(() => {});
+					}
+				})
 				.catch((e) => setError(e.message))
 				.finally(() => {
 					setLoading(false);

@@ -1,6 +1,7 @@
 import { retrieveLaunchParams } from "@telegram-apps/sdk";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { getReactionsForMany } from "../api/reactions";
 import {
 	createWish,
 	deleteWish,
@@ -12,7 +13,7 @@ import BackButton from "../components/BackButton";
 import { DropdownMenu, type MenuItem } from "../components/DropdownMenu";
 import MembersPanel from "../components/MembersPanel";
 import WishCard from "../components/WishCard";
-import type { Wish, Wishlist } from "../types";
+import type { Reaction, Wish, Wishlist } from "../types";
 
 export default function WishesPage() {
 	const navigate = useNavigate();
@@ -128,7 +129,27 @@ export default function WishesPage() {
 	useEffect(() => {
 		if (wishlistId) {
 			getWishes(Number(wishlistId))
-				.then(setWishes)
+				.then((items) => {
+					setWishes(items);
+					const ids = items.map((w) => w.id);
+					if (ids.length > 0) {
+						getReactionsForMany("wish", ids)
+							.then((reactions: Reaction[]) => {
+								const byTarget: Record<number, Reaction[]> = {};
+								for (const r of reactions) {
+									byTarget[r.target_id] = byTarget[r.target_id] ?? [];
+									byTarget[r.target_id].push(r);
+								}
+								setWishes((prev) =>
+									prev.map((w) => ({
+										...w,
+										reactions: byTarget[w.id] ?? [],
+									})),
+								);
+							})
+							.catch(() => {});
+					}
+				})
 				.catch((e) => setError(e.message))
 				.finally(() => {
 					setLoading(false);

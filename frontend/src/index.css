@@ -618,3 +618,117 @@ input:focus {
 
 	border-radius: 7px;
 }
+
+/* ---- Reactions ---- */
+
+.reaction-bar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin-top: 6px;
+	align-items: center;
+}
+
+.reaction-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 8px;
+	border-radius: 12px;
+	border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+	background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+	font-size: 14px;
+	cursor: pointer;
+	color: var(--tg-theme-text-color, #000000);
+}
+
+.reaction-chip:hover {
+	background-color: var(--tg-theme-bg-color, #ffffff);
+}
+
+.reaction-count {
+	font-size: 12px;
+	opacity: 0.7;
+}
+
+.reaction-add-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border-radius: 12px;
+	border: 1px dashed var(--tg-theme-hint-color, #cccccc);
+	background: none;
+	color: var(--tg-theme-hint-color, #888888);
+	font-size: 16px;
+	cursor: pointer;
+}
+
+.reaction-add-btn:hover {
+	border-color: var(--tg-theme-button-color, #2481cc);
+	color: var(--tg-theme-button-color, #2481cc);
+}
+
+.reaction-picker {
+	position: absolute;
+	bottom: 100%;
+	left: 0;
+	margin-bottom: 8px;
+	background-color: var(--tg-theme-bg-color, #ffffff);
+	border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+	border-radius: 12px;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+	padding: 12px;
+	z-index: 150;
+	width: 280px;
+	max-width: 90vw;
+}
+
+.reaction-search-input {
+	width: 100%;
+	padding: 8px 12px;
+	border-radius: 8px;
+	border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+	background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
+	color: var(--tg-theme-text-color, #000000);
+	font-size: 14px;
+	margin-bottom: 8px;
+}
+
+.reaction-emoji-grid {
+	display: grid;
+	grid-template-columns: repeat(8, 1fr);
+	gap: 4px;
+}
+
+.reaction-emoji-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border: none;
+	background: none;
+	font-size: 20px;
+	cursor: pointer;
+	border-radius: 6px;
+}
+
+.reaction-emoji-btn:hover {
+	background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+}
+
+.reaction-custom-input-row {
+	margin-top: 8px;
+}
+
+.reaction-custom-input {
+	width: 100%;
+	padding: 8px 12px;
+	border-radius: 8px;
+	border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+	background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
+	color: var(--tg-theme-text-color, #000000);
+	font-size: 14px;
+}

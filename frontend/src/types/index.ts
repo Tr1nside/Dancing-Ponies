@@ -28,6 +28,14 @@ export type Wishlist = {
 	members: User[];
 };
 
+export type Reaction = {
+	id: Id;
+	emoji: string;
+	user_id: Id;
+	target_type: "wish" | "todo";
+	target_id: Id;
+};
+
 export type Wish = {
 	id: Id;
 	title: string;
@@ -37,6 +45,7 @@ export type Wish = {
 	price: number | null;
 	is_completed: boolean;
 	photo_file_name: string | null;
+	reactions: Reaction[];
 };
 
 export type Todo = {
@@ -47,6 +56,7 @@ export type Todo = {
 	is_completed: boolean;
 	due_date: ISODateTimeString | null;
 	priority: number;
+	reactions: Reaction[];
 };
 
 export type CreateWishlistPayload = {

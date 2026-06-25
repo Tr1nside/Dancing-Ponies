@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from src.database import get_db
@@ -22,6 +23,23 @@ async def list_reactions(
     return (
         db.query(Reaction)
         .filter(Reaction.target_type == target_type, Reaction.target_id == target_id)
+        .all()
+    )
+
+
+@router.get("/all", response_model=list[ReactionResponse])
+async def list_reactions_for_many(
+    target_type: str = Query(...),
+    target_ids: str = Query(...),
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+) -> list[Reaction]:
+    ids = [int(i) for i in target_ids.split(",") if i.strip()]
+    if not ids:
+        return []
+    return (
+        db.query(Reaction)
+        .filter(Reaction.target_type == target_type, Reaction.target_id.in_(ids))
         .all()
     )
 
