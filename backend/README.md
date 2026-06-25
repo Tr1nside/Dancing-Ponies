@@ -50,6 +50,7 @@ backend/
 BD_PATH="./dancing_ponies.db"   # Путь к SQLite БД
 DEBUG=false                     # Режим отладки
 BOT_TOKEN="your_bot_token"      # Токен Telegram бота
+UPLOADS_DIR="./backend/src/uploads"  # Путь к папке загрузок
 ```
 
 ### Режим отладки (DEBUG=true)
@@ -71,6 +72,29 @@ uvicorn src.main:app --reload --host 0.0.0.0 --port 55555
 
 # Heroku
 # web: uvicorn src.main:app --host 0.0.0.0 --port $PORT
+```
+
+## Миграции базы данных
+
+Проект использует **Alembic** для управления миграциями.
+
+```bash
+cd backend
+
+# Применить все миграции
+alembic upgrade head
+
+# Создать новую миграцию (после изменения моделей)
+alembic revision --autogenerate -m "описание изменений"
+
+# Откатить последнюю миграцию
+alembic downgrade -1
+
+# Посмотреть текущую версию
+alembic current
+
+# Посмотреть историю
+alembic history --verbose
 ```
 
 ## API Endpoints
@@ -152,6 +176,7 @@ x-init-data: <Telegram WebApp initData>
 - `url` — ссылка (nullable)
 - `price` — цена в ₽ (nullable)
 - `is_completed` — выполнено ли
+- `photo_file_name` — имя файла фото (nullable)
 
 ### TodoItem
 
@@ -203,6 +228,14 @@ Procfile уже настроен: `web: uvicorn src.main:app --host 0.0.0.0 --po
 1. Установлены зависимости из `requirements.txt` или `pyproject.toml`
 2. Переменные окружения заданы
 3. БД путь доступен для записи
+
+## Загрузка файлов
+
+Фотографии загружаются в папку `UPLOADS_DIR` (по умолчанию `backend/src/uploads/wishes/`). Путь настраивается через переменную окружения `UPLOADS_DIR`.
+
+- Изображения сжимаются до 550×550 px
+- Старое фото удаляется при обновлении
+- Поддерживается загрузка через файл и буфер обмена
 
 ## Линтинг
 
