@@ -187,6 +187,7 @@ temp/
 *.sqlite3
 *.sqlite3-journal
 
+
 # Node.js
 node_modules/
 frontend/dist/
@@ -197,3 +198,6 @@ frontend/dist/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Alembic migrations
+versions/
