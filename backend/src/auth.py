@@ -60,14 +60,13 @@ def _register_user(user: dict) -> None:
 
 
 async def get_current_user(x_init_data: str = Header(...)) -> dict:
-    if not BOT_TOKEN or authenticator is None:
+    if DEBUG:
+        user = _get_debug_user(x_init_data)
+    elif not BOT_TOKEN or authenticator is None:
         raise HTTPException(
             status_code=INTERNAL_SERVER_ERROR_CODE,
             detail="Bot token not found",
         )
-
-    if DEBUG:
-        user = _get_debug_user(x_init_data)
     else:
         try:
             init_data = authenticator.validate(

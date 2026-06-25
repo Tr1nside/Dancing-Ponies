@@ -2,6 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from pathlib import Path
 from uuid import uuid4
+from io import BytesIO
+
+from PIL import Image
 
 from src.database import get_db
 from src.models import Wish
@@ -9,8 +12,10 @@ from src.schemas.wishes import WishResponse, CompleteWishRequest, WishUpdate
 from src.auth import get_current_user
 
 
-UPLOAD_DIR = Path(__file__).parent.parent.parent / "uploads" / "wishes"
+UPLOAD_DIR = Path(__file__).parent.parent / "uploads" / "wishes"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+MAX_IMAGE_SIZE = 550
 
 
 router = APIRouter(prefix="/wishes", tags=["wishes"])
@@ -27,12 +32,26 @@ def _check_acces(current_user: dict, wish: Wish):
     return True
 
 
+def _resize_image(image: Image.Image) -> Image.Image:
+    width, height = image.size
+    if width <= MAX_IMAGE_SIZE and height <= MAX_IMAGE_SIZE:
+        return image
+    if width < height:
+        new_height = MAX_IMAGE_SIZE
+        new_width = int(width * (MAX_IMAGE_SIZE / height))
+    else:
+        new_width = MAX_IMAGE_SIZE
+        new_height = int(height * (MAX_IMAGE_SIZE / width))
+    return image.resize((new_width, new_height), Image.LANCZOS)
+
+
 def _save_photo(photo: UploadFile) -> str:
-    suffix = Path(photo.filename).suffix if photo.filename else ""
+    suffix = Path(photo.filename).suffix if photo.filename else ".png"
     file_name = f"{uuid4().hex}{suffix}"
     file_path = UPLOAD_DIR / file_name
-    with file_path.open("wb") as f:
-        f.write(photo.file.read())
+    image = Image.open(BytesIO(photo.file.read()))
+    image = _resize_image(image)
+    image.save(file_path)
     return file_name
 
 
