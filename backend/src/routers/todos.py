@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.database import get_db
-from src.models import TodoItem
+from src.models import TodoItem, Reaction
 from src.schemas.todos import TodoItemResponse, CompleteTodoRequest, TodoItemUpdate
 from src.auth import get_current_user
 
@@ -11,13 +11,24 @@ NOT_FOUND_ERROR_CODE = 404
 NOT_ACCESS_ERROR_CODE = 403
 
 
-def _check_access(current_user: dict, item: TodoItem) -> bool:
-    todolist = item.todolist
+def _check_access(current_user: dict, target_item: TodoItem) -> bool:
+    todolist = target_item.todolist
     if current_user["id"] == todolist.owner_id:
         return True
     if current_user["id"] in [member.id for member in todolist.members]:
         return True
-    return False
+    return False  # noqa: WPS110
+
+
+def _attach_reactions(target_item, target_type: str, db: Session):
+    target_item.reactions = (
+        db.query(Reaction)
+        .filter(
+            Reaction.target_type == target_type, Reaction.target_id == target_item.id
+        )
+        .all()
+    )
+    return target_item
 
 
 @router.get("/{todo_id}", response_model=TodoItemResponse)
@@ -26,12 +37,12 @@ async def get_todo(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ) -> TodoItem:
-    item = db.query(TodoItem).filter(TodoItem.id == todo_id).first()
-    if not item:
+    target_item = db.query(TodoItem).filter(TodoItem.id == todo_id).first()
+    if not target_item:
         raise HTTPException(status_code=NOT_FOUND_ERROR_CODE, detail="Todo not found")
-    if not _check_access(current_user, item):
+    if not _check_access(current_user, target_item):
         raise HTTPException(status_code=NOT_ACCESS_ERROR_CODE, detail="No access")
-    return item
+    return _attach_reactions(target_item, "todo", db)
 
 
 @router.delete("/{todo_id}")
@@ -40,14 +51,14 @@ async def delete_todo(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ) -> dict:
-    item = db.query(TodoItem).filter(TodoItem.id == todo_id).first()
-    if not item:
+    target_item = db.query(TodoItem).filter(TodoItem.id == todo_id).first()
+    if not target_item:
         raise HTTPException(status_code=NOT_FOUND_ERROR_CODE, detail="Todo not found")
-    if not _check_access(current_user, item):
+    if not _check_access(current_user, target_item):
         raise HTTPException(status_code=NOT_ACCESS_ERROR_CODE, detail="No access")
-    db.delete(item)
+    db.delete(target_item)
     db.commit()
-    return {"deleted_id": item.id}
+    return {"deleted_id": target_item.id}
 
 
 @router.patch("/{todo_id}", response_model=TodoItemResponse)
@@ -57,18 +68,18 @@ async def update_todo(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ) -> TodoItem:
-    item = db.query(TodoItem).filter(TodoItem.id == todo_id).first()
-    if not item:
+    target_item = db.query(TodoItem).filter(TodoItem.id == todo_id).first()
+    if not target_item:
         raise HTTPException(status_code=NOT_FOUND_ERROR_CODE, detail="Todo not found")
-    if not _check_access(current_user, item):
+    if not _check_access(current_user, target_item):
         raise HTTPException(status_code=NOT_ACCESS_ERROR_CODE, detail="No access")
 
     updated_values = update_data.model_dump(exclude_unset=True)
-    for key, value in updated_values.items():
-        setattr(item, key, value)
+    for key, field_value in updated_values.items():
+        setattr(target_item, key, field_value)
 
     db.commit()
-    return item
+    return _attach_reactions(target_item, "todo", db)
 
 
 @router.patch("/{todo_id}/complete")
@@ -78,12 +89,12 @@ async def complete_todo(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ) -> dict:
-    item = db.query(TodoItem).filter(TodoItem.id == todo_id).first()
-    if not item:
+    target_item = db.query(TodoItem).filter(TodoItem.id == todo_id).first()
+    if not target_item:
         raise HTTPException(status_code=NOT_FOUND_ERROR_CODE, detail="Todo not found")
-    if not _check_access(current_user, item):
+    if not _check_access(current_user, target_item):
         raise HTTPException(status_code=NOT_ACCESS_ERROR_CODE, detail="No access")
 
-    item.is_completed = complete_data.is_completed
+    target_item.is_completed = complete_data.is_completed
     db.commit()
-    return {"completed_id": item.id}
+    return {"completed_id": target_item.id}

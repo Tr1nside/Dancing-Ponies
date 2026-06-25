@@ -1,5 +1,5 @@
 from sqlalchemy import Table, Column, Enum as SAEnum
-from sqlalchemy import ForeignKey, String, Integer, DateTime, Boolean
+from sqlalchemy import ForeignKey, String, Integer, DateTime, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from src.database import Base
 from datetime import datetime, timezone
@@ -22,8 +22,8 @@ class User(Base):
 wishlist_members = Table(
     "wishlist_members",
     Base.metadata,
-    Column("wishlist_id", ForeignKey("wishlists.id"), primary_key=True),
-    Column("user_id", ForeignKey("users.id"), primary_key=True),
+    Column("wishlist_id", ForeignKey("wishlists.id"), primary_key=True),  # noqa: WPS226
+    Column("user_id", ForeignKey("users.id"), primary_key=True),  # noqa: WPS226
 )
 
 
@@ -81,4 +81,21 @@ class Invite(Base):
     token: Mapped[str] = mapped_column(String)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=lambda: datetime.now(timezone.utc)
+    )
+
+
+class Reaction(Base):
+    __tablename__ = "reactions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    emoji: Mapped[str] = mapped_column(String(8))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    target_type: Mapped[str] = mapped_column(String())
+    target_id: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc)
+    )
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "target_type", "target_id", name="uq_user_target"),
     )

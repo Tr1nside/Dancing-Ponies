@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 from datetime import datetime
 
+from src.schemas.reactions import ReactionResponse
+
 
 class TodoItemCreate(BaseModel):
     todolist_id: int
@@ -18,6 +20,7 @@ class TodoItemResponse(BaseModel):
     is_completed: bool
     due_date: datetime | None
     priority: int
+    reactions: list[ReactionResponse] = []
 
     model_config = {"from_attributes": True}
 

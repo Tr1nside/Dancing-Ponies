@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
+from src.schemas.reactions import ReactionResponse
+
 
 class CompleteWishRequest(BaseModel):
     is_completed: bool
@@ -22,6 +24,7 @@ class WishResponse(BaseModel):
     price: int | None
     is_completed: bool
     photo_file_name: str | None = None
+    reactions: list[ReactionResponse] = []
 
     model_config = {"from_attributes": True}
 

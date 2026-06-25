@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.database import get_db
 from src.auth import get_current_user
-from src.models import WishList, User, Invite, Wish, TodoItem, ListType
+from src.models import WishList, User, Invite, Wish, TodoItem, ListType, Reaction
 from src.schemas.wishlists import WishListCreate, WishListResponse, WishListUpdate
 from src.schemas.invites import InviteResponse
 from src.schemas.wishes import WishCreate, WishResponse
@@ -12,6 +12,24 @@ import secrets
 from datetime import datetime, timezone, timedelta
 
 router = APIRouter(prefix="/wishlists", tags=["wishlists"])
+
+
+def _attach_reactions(target_items, target_type: str, db: Session) -> list:
+    if not target_items:
+        return target_items
+    target_ids = [target_item.id for target_item in target_items]
+    reactions = (
+        db.query(Reaction)
+        .filter(Reaction.target_type == target_type, Reaction.target_id.in_(target_ids))
+        .all()
+    )
+    by_target: dict[int, list] = {}
+    for reaction in reactions:
+        by_target.setdefault(reaction.target_id, []).append(reaction)
+    for target_item in target_items:
+        target_item.reactions = by_target.get(target_item.id, [])
+    return target_items
+
 
 NOT_FOUND_ERROR_CODE = 404
 NOT_ACCESS_ERROR_CODE = 403
@@ -24,7 +42,7 @@ TOKEN_DAYS_LIFETIME = 90
 def _check_member(user_id: int, wishlist: WishList) -> bool:
     if wishlist.owner_id == user_id:
         return True
-    if user_id in [m.id for m in wishlist.members]:
+    if user_id in [member.id for member in wishlist.members]:
         return True
     return False
 
@@ -179,7 +197,8 @@ async def get_wishes(
         raise HTTPException(
             status_code=WRONG_LIST_TYPE_CODE, detail="This list is not a wishlist"
         )
-    return db.query(Wish).filter(Wish.wishlist_id == wishlist_id).all()
+    wishes = db.query(Wish).filter(Wish.wishlist_id == wishlist_id).all()
+    return _attach_reactions(wishes, "wish", db)
 
 
 @router.post("/{wishlist_id}/wishes", response_model=WishResponse)
@@ -222,7 +241,8 @@ async def get_todos(
         raise HTTPException(
             status_code=WRONG_LIST_TYPE_CODE, detail="This list is not a todolist"
         )
-    return db.query(TodoItem).filter(TodoItem.todolist_id == wishlist_id).all()
+    todo_items = db.query(TodoItem).filter(TodoItem.todolist_id == wishlist_id).all()
+    return _attach_reactions(todo_items, "todo", db)
 
 
 @router.post("/{wishlist_id}/todos", response_model=TodoItemResponse)
@@ -239,14 +259,14 @@ async def create_todo(
         raise HTTPException(
             status_code=WRONG_LIST_TYPE_CODE, detail="This list is not a todolist"
         )
-    item = TodoItem(
+    todo_item = TodoItem(
         todolist_id=wishlist_id,
         title=created_data.title,
         description=created_data.description,
         due_date=created_data.due_date,
         priority=created_data.priority,
     )
-    db.add(item)
+    db.add(todo_item)
     db.commit()
-    db.refresh(item)
-    return item
+    db.refresh(todo_item)
+    return todo_item

@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from src.routers import invites, wishes, wishlists, todos
+from src.routers import invites, wishes, wishlists, todos, reactions
 from src.database import engine, Base
 
 app = FastAPI()
@@ -34,6 +34,7 @@ app.include_router(invites.router)
 app.include_router(wishes.router)
 app.include_router(wishlists.router)
 app.include_router(todos.router)
+app.include_router(reactions.router)
 
 
 @app.middleware("http")

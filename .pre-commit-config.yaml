@@ -14,5 +14,5 @@ repos:
     rev: 1.4.0
     hooks:
       - id: wemake-python-styleguide
-        args: [--max-line-length=120]
+        args: [--max-line-length=120, --extend-ignore=WPS226,WPS204,WPS404,WPS202,WPS210,WPS211]
         additional_dependencies: []

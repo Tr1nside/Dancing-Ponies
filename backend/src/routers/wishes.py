@@ -9,7 +9,7 @@ from io import BytesIO
 from PIL import Image
 
 from src.database import get_db
-from src.models import Wish
+from src.models import Wish, Reaction
 from src.schemas.wishes import WishResponse, CompleteWishRequest, WishUpdate
 from src.auth import get_current_user
 
@@ -61,6 +61,17 @@ def _find_wish(wish_id: int, db: Session) -> Wish | None:
     return db.query(Wish).filter(Wish.id == wish_id).first()
 
 
+def _attach_reactions(target_item, target_type: str, db: Session):
+    target_item.reactions = (
+        db.query(Reaction)
+        .filter(
+            Reaction.target_type == target_type, Reaction.target_id == target_item.id
+        )
+        .all()
+    )
+    return target_item
+
+
 def _get_wish(wish_id: int, db: Session) -> Wish:
     wish = _find_wish(wish_id, db)
     if not wish:
@@ -77,7 +88,7 @@ async def get_wish(
     wish = _get_wish(wish_id, db)
     if not _check_access(current_user, wish):
         raise HTTPException(status_code=FORBIDDEN_STATUS, detail=NO_ACCESS_MSG)
-    return wish
+    return _attach_reactions(wish, "wish", db)
 
 
 @router.delete("/{wish_id}")
@@ -132,7 +143,7 @@ async def update_wish(
 
     db.commit()
     db.refresh(wish)
-    return wish
+    return _attach_reactions(wish, "wish", db)
 
 
 @router.patch("/{wish_id}/complete")
