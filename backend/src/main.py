@@ -25,8 +25,8 @@ app.add_middleware(
 )
 
 requests_by_ip = defaultdict(deque)
-LIMIT = 100
-WINDOW = 60
+LIMIT = 1000
+WINDOW = 30
 TOO_MANY_REQUEST_STATUS = 429
 
 Base.metadata.create_all(bind=engine)
