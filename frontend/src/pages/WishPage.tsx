@@ -76,6 +76,20 @@ export default function WishPage() {
 	});
 	const [editPhoto, setEditPhoto] = useState<File | null>(null);
 
+	const handlePaste = (e: React.ClipboardEvent) => {
+		const items = e.clipboardData.items;
+		for (const item of items) {
+			if (item.type.startsWith("image/")) {
+				const file = item.getAsFile();
+				if (file) {
+					setEditPhoto(file);
+					e.preventDefault();
+					return;
+				}
+			}
+		}
+	};
+
 	const updateField = (
 		field: keyof typeof editData,
 		value: string | number,
@@ -246,7 +260,7 @@ export default function WishPage() {
 					</button>
 				</div>
 				{isEditing && (
-					<div className="wish-btns">
+					<div className="wish-btns" onPaste={handlePaste}>
 						<label className="btn-secondary">
 							Загрузить фото
 							<input
@@ -262,6 +276,7 @@ export default function WishPage() {
 						{editPhoto && (
 							<span className="photo-filename">{editPhoto.name}</span>
 						)}
+						<span className="photo-hint">или вставьте из буфера (Ctrl+V)</span>
 					</div>
 				)}
 				{isEditing && (
