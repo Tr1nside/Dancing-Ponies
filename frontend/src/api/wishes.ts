@@ -25,11 +25,11 @@ export const updateWish = (
 	if (hasFile) {
 		const formData = new FormData();
 		if (data.title !== undefined) formData.append("title", data.title);
-		if (data.description !== undefined)
+		if (data.description != null)
 			formData.append("description", data.description);
 		if (data.price !== undefined && data.price !== null)
 			formData.append("price", String(data.price));
-		if (data.url !== undefined) formData.append("url", data.url);
+		if (data.url != null) formData.append("url", data.url);
 		if (data.photo) formData.append("photo", data.photo);
 		return client.patch(`/wishes/${id}`, formData).then((r) => r.data);
 	}
