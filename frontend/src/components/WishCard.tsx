@@ -84,7 +84,8 @@ export default function WishCard({
 
 	return (
 		<div className="wishcard-div">
-			<span className="wishlist-left">
+			<div className="wishcard-main">
+                
 				<input
 					type="checkbox"
 					checked={wish.is_completed}
@@ -104,7 +105,15 @@ export default function WishCard({
 				>
 					{wish.title} {wish.price ? `— ${wish.price}₽` : ""}
 				</button>
-			</span>
+				<DropdownMenu
+					items={[
+						{
+							label: "Delete",
+							onClick: () => deleteWishF(wish),
+						},
+					]}
+				/>
+			</div>
 			<div className="reaction-bar">
 				{Object.entries(grouped).map(([emoji, items]) => (
 					<button
@@ -117,28 +126,25 @@ export default function WishCard({
 						{emoji} <span className="reaction-count">{items.length}</span>
 					</button>
 				))}
-				<button
-					type="button"
-					className="reaction-add-btn"
-					onClick={() => setPickerOpen(true)}
-				>
-					+
-				</button>
+				<div className="reaction-picker-wrapper">
+					<button
+						type="button"
+						className="reaction-add-btn"
+						onClick={(e) => {
+							e.stopPropagation();
+							setPickerOpen(true);
+						}}
+					>
+						+
+					</button>
+					{pickerOpen && (
+						<ReactionPicker
+							onSelect={handleSelectReaction}
+							onClose={() => setPickerOpen(false)}
+						/>
+					)}
+				</div>
 			</div>
-			<DropdownMenu
-				items={[
-					{
-						label: "Delete",
-						onClick: () => deleteWishF(wish),
-					},
-				]}
-			/>
-			{pickerOpen && (
-				<ReactionPicker
-					onSelect={handleSelectReaction}
-					onClose={() => setPickerOpen(false)}
-				/>
-			)}
 		</div>
 	);
 }

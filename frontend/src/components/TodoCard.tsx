@@ -81,7 +81,7 @@ export default function TodoCard({
 
 	return (
 		<div className="wishcard-div">
-			<span className="wishlist-left">
+			<div className="wishcard-main">
 				<input
 					type="checkbox"
 					checked={todo.is_completed}
@@ -101,7 +101,15 @@ export default function TodoCard({
 				>
 					{todo.title}
 				</button>
-			</span>
+				<DropdownMenu
+					items={[
+						{
+							label: "Delete",
+							onClick: () => deleteWishF(todo),
+						},
+					]}
+				/>
+			</div>
 			<div className="reaction-bar">
 				{Object.entries(grouped).map(([emoji, items]) => (
 					<button
@@ -114,28 +122,25 @@ export default function TodoCard({
 						{emoji} <span className="reaction-count">{items.length}</span>
 					</button>
 				))}
-				<button
-					type="button"
-					className="reaction-add-btn"
-					onClick={() => setPickerOpen(true)}
-				>
-					+
-				</button>
+				<div className="reaction-picker-wrapper">
+					<button
+						type="button"
+						className="reaction-add-btn"
+						onClick={(e) => {
+							e.stopPropagation();
+							setPickerOpen(true);
+						}}
+					>
+						+
+					</button>
+					{pickerOpen && (
+						<ReactionPicker
+							onSelect={handleSelectReaction}
+							onClose={() => setPickerOpen(false)}
+						/>
+					)}
+				</div>
 			</div>
-			<DropdownMenu
-				items={[
-					{
-						label: "Delete",
-						onClick: () => deleteWishF(todo),
-					},
-				]}
-			/>
-			{pickerOpen && (
-				<ReactionPicker
-					onSelect={handleSelectReaction}
-					onClose={() => setPickerOpen(false)}
-				/>
-			)}
 		</div>
 	);
 }
