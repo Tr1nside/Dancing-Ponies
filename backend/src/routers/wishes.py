@@ -1,3 +1,5 @@
+import logging
+import os
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from pathlib import Path
@@ -11,28 +13,33 @@ from src.models import Wish
 from src.schemas.wishes import WishResponse, CompleteWishRequest, WishUpdate
 from src.auth import get_current_user
 
+logger = logging.getLogger(__name__)
 
-UPLOAD_DIR = Path(__file__).parent.parent / "uploads" / "wishes"
+DEFAULT_UPLOADS_PATH = str(Path(__file__).parent.parent / "uploads")
+UPLOAD_BASE_DIR = Path(os.getenv("UPLOADS_DIR", DEFAULT_UPLOADS_PATH))
+UPLOAD_DIR = UPLOAD_BASE_DIR / "wishes"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 MAX_IMAGE_SIZE = 550
-
+NOT_FOUND_STATUS = 404
+FORBIDDEN_STATUS = 403
+NOT_FOUND_MSG = "Wish not found"
+NO_ACCESS_MSG = "No access"
 
 router = APIRouter(prefix="/wishes", tags=["wishes"])
 
-NOT_FOUND_ERROR_CODE = 404
-NOT_ACCESS_ERROR_CODE = 403
+
+def _check_access(user: dict, wish: Wish) -> bool:
+    is_owner = user["id"] == wish.wishlist.owner_id
+    is_member = user["id"] in [member.id for member in wish.wishlist.members]
+    return is_owner or is_member
 
 
-def _check_acces(current_user: dict, wish: Wish):
-    if current_user["id"] != wish.wishlist.owner_id and current_user["id"] not in [
-        member.id for member in wish.wishlist.members
-    ]:
-        return False
-    return True
-
-
-def _resize_image(image: Image.Image) -> Image.Image:
+def _process_image(photo: UploadFile) -> str:
+    suffix = Path(photo.filename).suffix if photo.filename else ".png"
+    file_name = f"{uuid4().hex}{suffix}"
+    file_path = UPLOAD_DIR / file_name
+    image = Image.open(BytesIO(photo.file.read()))
     width, height = image.size
     if width > MAX_IMAGE_SIZE or height > MAX_IMAGE_SIZE:
         if width < height:
@@ -45,17 +52,20 @@ def _resize_image(image: Image.Image) -> Image.Image:
     min_side = min(image.size)
     left = (image.size[0] - min_side) // 2
     top = (image.size[1] - min_side) // 2
-    return image.crop((left, top, left + min_side, top + min_side))
-
-
-def _save_photo(photo: UploadFile) -> str:
-    suffix = Path(photo.filename).suffix if photo.filename else ".png"
-    file_name = f"{uuid4().hex}{suffix}"
-    file_path = UPLOAD_DIR / file_name
-    image = Image.open(BytesIO(photo.file.read()))
-    image = _resize_image(image)
+    image = image.crop((left, top, left + min_side, top + min_side))
     image.save(file_path)
     return file_name
+
+
+def _find_wish(wish_id: int, db: Session) -> Wish | None:
+    return db.query(Wish).filter(Wish.id == wish_id).first()
+
+
+def _get_wish(wish_id: int, db: Session) -> Wish:
+    wish = _find_wish(wish_id, db)
+    if not wish:
+        raise HTTPException(status_code=NOT_FOUND_STATUS, detail=NOT_FOUND_MSG)
+    return wish
 
 
 @router.get("/{wish_id}", response_model=WishResponse)
@@ -64,12 +74,9 @@ async def get_wish(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ) -> Wish:
-    wish = db.query(Wish).filter(Wish.id == wish_id).first()
-    if not wish:
-        raise HTTPException(status_code=NOT_FOUND_ERROR_CODE, detail="Wish not found")
-    if not _check_acces(current_user, wish):
-        raise HTTPException(status_code=NOT_ACCESS_ERROR_CODE, detail="No access")
-
+    wish = _get_wish(wish_id, db)
+    if not _check_access(current_user, wish):
+        raise HTTPException(status_code=FORBIDDEN_STATUS, detail=NO_ACCESS_MSG)
     return wish
 
 
@@ -79,11 +86,9 @@ async def delete_wish(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ) -> dict:
-    wish = db.query(Wish).filter(Wish.id == wish_id).first()
-    if not wish:
-        raise HTTPException(status_code=NOT_FOUND_ERROR_CODE, detail="Wish not found")
-    if not _check_acces(current_user, wish):
-        raise HTTPException(status_code=NOT_ACCESS_ERROR_CODE, detail="No access")
+    wish = _get_wish(wish_id, db)
+    if not _check_access(current_user, wish):
+        raise HTTPException(status_code=FORBIDDEN_STATUS, detail=NO_ACCESS_MSG)
     db.delete(wish)
     db.commit()
     return {"deleted_id": wish.id}
@@ -100,11 +105,9 @@ async def update_wish(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    wish = db.query(Wish).filter(Wish.id == wish_id).first()
-    if not wish:
-        raise HTTPException(status_code=404, detail="Wish not found")
-    if not _check_acces(current_user, wish):
-        raise HTTPException(status_code=403, detail="No access")
+    wish = _get_wish(wish_id, db)
+    if not _check_access(current_user, wish):
+        raise HTTPException(status_code=FORBIDDEN_STATUS, detail=NO_ACCESS_MSG)
 
     update_data = WishUpdate(
         title=title,
@@ -113,20 +116,20 @@ async def update_wish(
         url=url,
     )
 
-    values = update_data.model_dump(exclude_unset=True)
-    for key, value in values.items():
-        setattr(wish, key, value)
+    fields_to_update = update_data.model_dump(exclude_unset=True)
+    for field_name, field_value in fields_to_update.items():
+        setattr(wish, field_name, field_value)
 
     if photo is not None:
         old_photo = wish.photo_file_name
-        wish.photo_file_name = _save_photo(photo)
-        db.commit()
+        wish.photo_file_name = _process_image(photo)
         if old_photo:
             old_path = UPLOAD_DIR / old_photo
             try:
                 old_path.unlink()
-            except OSError:
-                pass
+            except OSError as exc:
+                logger.error("Failed to delete old photo: %s", exc)
+
     db.commit()
     db.refresh(wish)
     return wish
@@ -139,13 +142,9 @@ async def complete_wish(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ) -> dict:
-    wish = db.query(Wish).filter(Wish.id == wish_id).first()
-    if not wish:
-        raise HTTPException(status_code=NOT_FOUND_ERROR_CODE, detail="Wish not found")
-
-    if not _check_acces(current_user, wish):
-        raise HTTPException(status_code=NOT_ACCESS_ERROR_CODE, detail="No access")
-
+    wish = _get_wish(wish_id, db)
+    if not _check_access(current_user, wish):
+        raise HTTPException(status_code=FORBIDDEN_STATUS, detail=NO_ACCESS_MSG)
     wish.is_completed = complete_data.is_completed
     db.commit()
     return {"completed_id": wish.id}

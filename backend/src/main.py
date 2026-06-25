@@ -1,4 +1,5 @@
 from collections import defaultdict, deque
+import os
 import time
 from pathlib import Path
 
@@ -12,7 +13,8 @@ from src.database import engine, Base
 
 app = FastAPI()
 
-UPLOADS_DIR = Path(__file__).parent / "uploads"
+DEFAULT_UPLOADS_DIR = str(Path(__file__).parent / "uploads")
+UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", DEFAULT_UPLOADS_DIR))
 app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
 app.add_middleware(
@@ -25,6 +27,7 @@ app.add_middleware(
 requests_by_ip = defaultdict(deque)
 LIMIT = 100
 WINDOW = 60
+TOO_MANY_REQUEST_STATUS = 429
 
 Base.metadata.create_all(bind=engine)
 app.include_router(invites.router)
@@ -44,7 +47,7 @@ async def rate_limit_and_security_headers(request: Request, call_next):
 
     if len(bucket) >= LIMIT:
         return JSONResponse(
-            status_code=429,
+            status_code=TOO_MANY_REQUEST_STATUS,
             content={"detail": "Too Many Requests"},
         )
 
