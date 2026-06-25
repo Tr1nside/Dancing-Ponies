@@ -604,6 +604,14 @@ input:focus {
 	border-radius: 7px;
 }
 
+.wish-btns label.btn-secondary {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 10px 16px;
+	cursor: pointer;
+}
+
 .wish-input {
 	flex: 1;
 	padding: 10px 16px;
