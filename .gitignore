@@ -199,5 +199,3 @@ frontend/dist/
 .DS_Store
 Thumbs.db
 
-# Alembic migrations
-versions/

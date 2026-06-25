@@ -83,7 +83,7 @@ export default function WishlistsPage() {
 						setEmoji(e.target.value);
 					}}
 				/>
-				<select 
+				<select
 					id="list-type-input"
 					value={listType}
 					onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>

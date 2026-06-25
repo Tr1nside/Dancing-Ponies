@@ -4,8 +4,10 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 import os
 from dotenv import load_dotenv
-from src.database import Base
 from alembic import context
+
+from src.database import Base
+from src.models import *  # noqa: F401,F403  # pylint: disable=wildcard-import
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
