@@ -77,6 +77,20 @@ header h1 {
 	height: 44px;
 }
 
+/* ---- Wish image ---- */
+
+.wish-image {
+	width: 100%;
+	max-height: 100%;
+	aspect-ratio: 1 / 1;
+	object-fit: cover;
+	border-radius: 12px;
+	box-shadow:
+		2px 2px 6px rgba(255, 255, 255, 0.15),
+		-2px -2px 6px rgba(0, 0, 0, 0.3);
+	display: block;
+}
+
 /* ---- Wish body (страница одного желания) ---- */
 
 .wish-body {
