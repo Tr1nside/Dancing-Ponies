@@ -25,13 +25,14 @@ export default function TodosPage() {
 	const [listTitle, setListTitle] = useState<string>("");
 	const [emoji, setEmoji] = useState<string>("");
 	const [membersOpen, setMembersOpen] = useState(false);
-	let currentUserId = 0;
-	try {
-		const { initData } = retrieveLaunchParams();
-		currentUserId = initData?.user?.id ?? 0;
-	} catch {
-		currentUserId = Number(import.meta.env.VITE_DEV_INIT_DATA);
-	}
+	const currentUserId = (() => {
+		try {
+			const { initData } = retrieveLaunchParams();
+			return initData?.user?.id ?? 0;
+		} catch {
+			return Number(import.meta.env.VITE_DEV_INIT_DATA);
+		}
+	})();
 	const isOwner = todolist?.owner_id === currentUserId;
 
 	const handleSave = async () => {

@@ -10,6 +10,8 @@ import BackButton from "../components/BackButton";
 import { DropdownMenu, type MenuItem } from "../components/DropdownMenu";
 import type { Wish } from "../types";
 
+const API_URL = import.meta.env.VITE_API_URL ?? "";
+
 function normalizeUrl(url: string): string {
 	if (!url) return "";
 	if (url.startsWith("http://") || url.startsWith("https://")) return url;
@@ -72,6 +74,7 @@ export default function WishPage() {
 		price: 0,
 		url: "",
 	});
+	const [editPhoto, setEditPhoto] = useState<File | null>(null);
 
 	const updateField = (
 		field: keyof typeof editData,
@@ -101,6 +104,7 @@ export default function WishPage() {
 				price: wish.price ?? 0,
 				url: wish.url ?? "",
 			});
+			setEditPhoto(null);
 		}
 		setIsEditing(!isEditing);
 	};
@@ -108,9 +112,11 @@ export default function WishPage() {
 	const handleSave = async () => {
 		if (wish === null) return;
 		try {
-			const updated = await updateWish(wish.id, editData);
+			const payload = { ...editData, photo: editPhoto };
+			const updated = await updateWish(wish.id, payload);
 			setWish(updated);
 			setIsEditing(false);
+			setEditPhoto(null);
 		} catch (e) {
 			setError(e instanceof Error ? e.message : "Ошибка");
 		}
@@ -186,7 +192,13 @@ export default function WishPage() {
 			</header>
 			<div className="wish-body">
 				<p className="exp">Wish</p>
-
+				{wish.photo_file_name && (
+					<img
+						src={`${API_URL}/uploads/wishes/${wish.photo_file_name}`}
+						alt={wish.title}
+						className="wish-image"
+					/>
+				)}
 				<EditableField
 					isEditing={isEditing}
 					value={editData.description}
@@ -233,6 +245,25 @@ export default function WishPage() {
 						{wish.is_completed ? "Done" : "Mark as done"}
 					</button>
 				</div>
+				{isEditing && (
+					<div className="wish-btns">
+						<label className="btn-secondary">
+							Загрузить фото
+							<input
+								type="file"
+								accept="image/*"
+								onChange={(e) => {
+									const file = e.target.files?.[0];
+									if (file) setEditPhoto(file);
+								}}
+								style={{ display: "none" }}
+							/>
+						</label>
+						{editPhoto && (
+							<span className="photo-filename">{editPhoto.name}</span>
+						)}
+					</div>
+				)}
 				{isEditing && (
 					<div className="wish-btns">
 						<button type="button" onClick={handleSave}>

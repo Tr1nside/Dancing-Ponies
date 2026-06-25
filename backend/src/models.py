@@ -48,8 +48,8 @@ class WishList(Base):
 
 class Wish(Base):
     __tablename__ = "wish"
-
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    photo_file_name: Mapped[str | None] = mapped_column(String, nullable=True)
     wishlist_id: Mapped[int] = mapped_column(ForeignKey("wishlists.id"))
     wishlist: Mapped[WishList] = relationship("WishList")
     title: Mapped[str] = mapped_column(String)

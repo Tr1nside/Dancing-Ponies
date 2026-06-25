@@ -21,6 +21,7 @@ class WishResponse(BaseModel):
     url: str | None
     price: int | None
     is_completed: bool
+    photo_file_name: str | None = None
 
     model_config = {"from_attributes": True}
 
@@ -30,3 +31,4 @@ class WishUpdate(BaseModel):
     description: str | None = None
     price: float | None = None
     url: str | None = None
+    photo_file_name: str | None = None

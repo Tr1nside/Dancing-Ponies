@@ -1,9 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
+from pathlib import Path
+from uuid import uuid4
+
 from src.database import get_db
 from src.models import Wish
 from src.schemas.wishes import WishResponse, CompleteWishRequest, WishUpdate
 from src.auth import get_current_user
+
+
+UPLOAD_DIR = Path(__file__).parent.parent.parent / "uploads" / "wishes"
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
 
 router = APIRouter(prefix="/wishes", tags=["wishes"])
 
@@ -17,6 +25,15 @@ def _check_acces(current_user: dict, wish: Wish):
     ]:
         return False
     return True
+
+
+def _save_photo(photo: UploadFile) -> str:
+    suffix = Path(photo.filename).suffix if photo.filename else ""
+    file_name = f"{uuid4().hex}{suffix}"
+    file_path = UPLOAD_DIR / file_name
+    with file_path.open("wb") as f:
+        f.write(photo.file.read())
+    return file_name
 
 
 @router.get("/{wish_id}", response_model=WishResponse)
@@ -53,23 +70,36 @@ async def delete_wish(
 @router.patch("/{wish_id}", response_model=WishResponse)
 async def update_wish(
     wish_id: int,
-    update_data: WishUpdate,
+    title: str | None = Form(None),
+    description: str | None = Form(None),
+    price: int | None = Form(None),
+    url: str | None = Form(None),
+    photo: UploadFile | None = File(None),
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     wish = db.query(Wish).filter(Wish.id == wish_id).first()
     if not wish:
-        raise HTTPException(status_code=NOT_FOUND_ERROR_CODE, detail="Wish not found")
-
+        raise HTTPException(status_code=404, detail="Wish not found")
     if not _check_acces(current_user, wish):
-        raise HTTPException(status_code=NOT_ACCESS_ERROR_CODE, detail="No access")
+        raise HTTPException(status_code=403, detail="No access")
 
-    updated_values = update_data.model_dump(exclude_unset=True)
-    for key, updated_value in updated_values.items():
-        setattr(wish, key, updated_value)
+    update_data = WishUpdate(
+        title=title,
+        description=description,
+        price=price,
+        url=url,
+    )
+
+    values = update_data.model_dump(exclude_unset=True)
+    for key, value in values.items():
+        setattr(wish, key, value)
+
+    if photo is not None:
+        wish.photo_file_name = _save_photo(photo)
 
     db.commit()
-
+    db.refresh(wish)
     return wish
 
 

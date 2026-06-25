@@ -36,6 +36,7 @@ export type Wish = {
 	url: string | null;
 	price: number | null;
 	is_completed: boolean;
+	photo_file_name: string | null;
 };
 
 export type Todo = {
@@ -72,6 +73,7 @@ export type WishUpdatePayload = {
 	description?: string | null;
 	price?: number | null;
 	url?: string | null;
+	photo?: File | null;
 };
 
 export type HandleWishCompleteRequest = {

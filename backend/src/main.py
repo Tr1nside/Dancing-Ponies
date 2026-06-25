@@ -1,14 +1,19 @@
 from collections import defaultdict, deque
 import time
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from src.routers import invites, wishes, wishlists, todos
 from src.database import engine, Base
 
 app = FastAPI()
+
+UPLOADS_DIR = Path(__file__).parent / "uploads"
+app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
 app.add_middleware(
     CORSMiddleware,

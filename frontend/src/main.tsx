@@ -9,7 +9,7 @@ const isDebug = import.meta.env.VITE_DEBUG === "true";
 if (!isDebug) {
 	init();
 }
-createRoot(document.getElementById("root")!).render(
+createRoot(document.getElementById("root") as HTMLElement).render(
 	<StrictMode>
 		<App />
 	</StrictMode>,
