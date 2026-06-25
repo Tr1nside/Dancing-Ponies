@@ -118,8 +118,15 @@ async def update_wish(
         setattr(wish, key, value)
 
     if photo is not None:
+        old_photo = wish.photo_file_name
         wish.photo_file_name = _save_photo(photo)
-
+        db.commit()
+        if old_photo:
+            old_path = UPLOAD_DIR / old_photo
+            try:
+                old_path.unlink()
+            except OSError:
+                pass
     db.commit()
     db.refresh(wish)
     return wish

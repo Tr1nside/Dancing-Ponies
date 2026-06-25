@@ -76,23 +76,6 @@ export default function WishPage() {
 	});
 	const [editPhoto, setEditPhoto] = useState<File | null>(null);
 
-	const handlePasteFromClipboard = async () => {
-		try {
-			const items = await navigator.clipboard.read();
-			for (const item of items) {
-				const imageType = item.types.find((t) => t.startsWith("image/"));
-				if (imageType) {
-					const blob = await item.getType(imageType);
-					const file = new File([blob], "clipboard.png", { type: imageType });
-					setEditPhoto(file);
-					return;
-				}
-			}
-		} catch {
-			// clipboard access denied or no image
-		}
-	};
-
 	const updateField = (
 		field: keyof typeof editData,
 		value: string | number,
@@ -276,13 +259,6 @@ export default function WishPage() {
 								style={{ display: "none" }}
 							/>
 						</label>
-						<button
-							type="button"
-							className="btn-secondary"
-							onClick={handlePasteFromClipboard}
-						>
-							Из буфера
-						</button>
 						{editPhoto && (
 							<span className="photo-filename">{editPhoto.name}</span>
 						)}
