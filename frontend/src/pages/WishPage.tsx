@@ -193,11 +193,13 @@ export default function WishPage() {
 			<div className="wish-body">
 				<p className="exp">Wish</p>
 				{wish.photo_file_name && (
-					<img
-						src={`${API_URL}/uploads/wishes/${wish.photo_file_name}`}
-						alt={wish.title}
-						className="wish-image"
-					/>
+                    <div className="wish-image-container">
+                        <img
+                            src={`${API_URL}/uploads/wishes/${wish.photo_file_name}`}
+                            alt={wish.title}
+                            className="wish-image"
+                        />
+                    </div>
 				)}
 				<EditableField
 					isEditing={isEditing}

@@ -85,26 +85,27 @@ export default function WishCard({
 	return (
 		<div className="wishcard-div">
 			<div className="wishcard-main">
-                
-				<input
-					type="checkbox"
-					checked={wish.is_completed}
-					onChange={(e) => onComplete(e.target.checked)}
-				/>
-				<button
-					className="wish-btn"
-					type="button"
-					key={wish.id}
-					onClick={onClick}
-					onMouseDown={handleLongPressStart}
-					onMouseUp={handleLongPressEnd}
-					onMouseLeave={handleLongPressEnd}
-					onTouchStart={handleLongPressStart}
-					onTouchEnd={handleLongPressEnd}
-					onContextMenu={handleContextMenu}
-				>
-					{wish.title} {wish.price ? `— ${wish.price}₽` : ""}
-				</button>
+                <span className="wishlist-left">
+                    <input
+                        type="checkbox"
+                        checked={wish.is_completed}
+                        onChange={(e) => onComplete(e.target.checked)}
+                    />
+                    <button
+                        className="wish-btn"
+                        type="button"
+                        key={wish.id}
+                        onClick={onClick}
+                        onMouseDown={handleLongPressStart}
+                        onMouseUp={handleLongPressEnd}
+                        onMouseLeave={handleLongPressEnd}
+                        onTouchStart={handleLongPressStart}
+                        onTouchEnd={handleLongPressEnd}
+                        onContextMenu={handleContextMenu}
+                    >
+                        {wish.title} {wish.price ? `— ${wish.price}₽` : ""}
+                    </button>
+                </span>
 				<DropdownMenu
 					items={[
 						{

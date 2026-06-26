@@ -82,25 +82,28 @@ export default function TodoCard({
 	return (
 		<div className="wishcard-div">
 			<div className="wishcard-main">
-				<input
-					type="checkbox"
-					checked={todo.is_completed}
-					onChange={(e) => onComplete(e.target.checked)}
-				/>
-				<button
-					className="wish-btn"
-					type="button"
-					key={todo.id}
-					onClick={onClick}
-					onMouseDown={handleLongPressStart}
-					onMouseUp={handleLongPressEnd}
-					onMouseLeave={handleLongPressEnd}
-					onTouchStart={handleLongPressStart}
-					onTouchEnd={handleLongPressEnd}
-					onContextMenu={handleContextMenu}
-				>
-					{todo.title}
-				</button>
+                <span className="wishlist-left">
+                    <input
+                        type="checkbox"
+                        checked={todo.is_completed}
+                        onChange={(e) => onComplete(e.target.checked)}
+                    />
+                    <button
+                        className="wish-btn"
+                        type="button"
+                        key={todo.id}
+                        onClick={onClick}
+                        onMouseDown={handleLongPressStart}
+                        onMouseUp={handleLongPressEnd}
+                        onMouseLeave={handleLongPressEnd}
+                        onTouchStart={handleLongPressStart}
+                        onTouchEnd={handleLongPressEnd}
+                        onContextMenu={handleContextMenu}
+                    >
+                        {todo.title}
+                    </button>
+                
+                </span>
 				<DropdownMenu
 					items={[
 						{

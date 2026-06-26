@@ -266,7 +266,7 @@ export default function WishesPage() {
 				<div style={{ display: "flex", alignItems: "center" }}>
 					<p className="exp">My Wishes</p>
 					<p className="exp" style={{ marginLeft: "auto" }}>
-						{totalPrice}
+						{totalPrice} ₽
 					</p>
 				</div>
 				{wishes.map((w) => (

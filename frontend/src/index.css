@@ -77,6 +77,9 @@ header h1 {
 	height: 44px;
 }
 
+
+/* ---- Общий layout ---- */
+
 /* ---- Wish image ---- */
 
 .wish-image {
@@ -85,10 +88,28 @@ header h1 {
 	aspect-ratio: 1 / 1;
 	object-fit: cover;
 	border-radius: 12px;
-	box-shadow:
-		inset 2px 2px 6px rgba(255, 255, 255, 0.15),
-		inset -2px -2px 6px rgba(0, 0, 0, 0.3);
 	display: block;
+}
+
+
+/* Wrapper for inset shadow */
+.wish-image-container {
+	position: relative;
+	width: 100%;
+	aspect-ratio: 1 / 1;
+	border-radius: 12px;
+	overflow: hidden;
+}
+
+.wish-image-container::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: 12px;
+	box-shadow:
+		inset 2px 2px 8px rgba(255, 255, 255, 0.3),
+		inset -2px -2px 8px rgba(0, 0, 0, 0.3);
+	pointer-events: none;
 }
 
 /* ---- Wish body (страница одного желания) ---- */
@@ -117,7 +138,6 @@ header h1 {
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
-	gap: 0.5em;
 	padding: 0.625em 1em;
 	padding-right: 0;
 }
@@ -132,7 +152,7 @@ header h1 {
 
 .wishcard-div button {
 	font-size: 1rem;
-	padding: 0;
+	padding: 0.2em;
 	background-color: var(--tg-theme-bg-color, #ffffff);
 }
 
@@ -643,7 +663,7 @@ input:focus {
 	display: inline-flex;
 	align-items: center;
 	gap: 4px;
-	padding: 2px 8px;
+	padding: 0.2em 0.2em !important;
 	border-radius: 12px;
 	border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
 	background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
@@ -665,8 +685,8 @@ input:focus {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 28px;
-	height: 28px;
+	width: 30px;
+	height: 30px;
 	border-radius: 12px;
 	border: 1px dashed var(--tg-theme-hint-color, #cccccc);
 	background: none;
