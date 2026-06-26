@@ -83,7 +83,7 @@ export default function WishCard({
 	}, {});
 
 	return (
-		<div className="wishcard-div">
+	<div className={`wishcard-div${wish.is_completed ? " completed" : ""}`}>
 			<div className="wishcard-main">
                 <span className="wishlist-left">
                     <input
