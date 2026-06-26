@@ -83,9 +83,9 @@ export default function WishCard({
 	}, {});
 
 	return (
-	<div className={`wishcard-div${wish.is_completed ? " completed" : ""}`}>
+	<div className={`wishcard-div`}>
 			<div className="wishcard-main">
-                <span className="wishlist-left">
+                <span className={`wishlist-left${wish.is_completed ? " completed" : ""}`}>
                     <input
                         type="checkbox"
                         checked={wish.is_completed}

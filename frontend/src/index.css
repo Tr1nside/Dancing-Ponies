@@ -190,7 +190,7 @@ header h1 {
 	cursor: pointer;
 }
 
-.wishcard-div.completed {
+.wishlist-left.completed {
 	opacity: 0.7;
 	text-decoration: line-through;
 }
