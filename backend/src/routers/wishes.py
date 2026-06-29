@@ -20,6 +20,8 @@ UPLOAD_BASE_DIR = Path(os.getenv("UPLOADS_DIR", DEFAULT_UPLOADS_PATH))
 UPLOAD_DIR = UPLOAD_BASE_DIR / "wishes"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
+print(f"[wishes] UPLOAD_DIR = {UPLOAD_DIR.resolve()}")
+
 MAX_IMAGE_SIZE = 550
 NOT_FOUND_STATUS = 404
 FORBIDDEN_STATUS = 403
@@ -39,7 +41,11 @@ def _process_image(photo: UploadFile) -> str:
     suffix = Path(photo.filename).suffix if photo.filename else ".png"
     file_name = f"{uuid4().hex}{suffix}"
     file_path = UPLOAD_DIR / file_name
-    image = Image.open(BytesIO(photo.file.read()))
+    image_data = photo.file.read()
+    if not image_data:
+        raise HTTPException(status_code=400, detail="Empty image file")
+    image = Image.open(BytesIO(image_data))
+    image.load()  # force read to catch corrupt images early
     width, height = image.size
     if width > MAX_IMAGE_SIZE or height > MAX_IMAGE_SIZE:
         if width < height:
@@ -53,7 +59,7 @@ def _process_image(photo: UploadFile) -> str:
     left = (image.size[0] - min_side) // 2
     top = (image.size[1] - min_side) // 2
     image = image.crop((left, top, left + min_side, top + min_side))
-    image.save(file_path)
+    image.save(str(file_path))
     return file_name
 
 
@@ -132,16 +138,21 @@ async def update_wish(
         for k, v in update_data.model_dump(exclude_unset=True).items()
         if v is not None
     }
-
     print(update_data)
     print(fields_to_update)
-
     for field_name, field_value in fields_to_update.items():
         setattr(wish, field_name, field_value)
 
     if photo is not None:
         old_photo = wish.photo_file_name
-        wish.photo_file_name = _process_image(photo)
+        try:
+            UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+            wish.photo_file_name = _process_image(photo)
+        except HTTPException:
+            raise
+        except Exception as exc:
+            logger.error("Failed to save photo: %s", exc)
+            raise HTTPException(status_code=500, detail=f"Failed to save photo: {exc}")
         if old_photo:
             old_path = UPLOAD_DIR / old_photo
             try:
