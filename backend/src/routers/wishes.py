@@ -127,7 +127,11 @@ async def update_wish(
         url=url,
     )
 
-    fields_to_update = update_data.model_dump(exclude_unset=True)
+    fields_to_update = {
+        k: v
+        for k, v in update_data.model_dump(exclude_unset=True).items()
+        if v is not None
+    }
     for field_name, field_value in fields_to_update.items():
         setattr(wish, field_name, field_value)
 

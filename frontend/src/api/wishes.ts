@@ -21,19 +21,15 @@ export const updateWish = (
 	id: number,
 	data: WishUpdatePayload,
 ): Promise<Wish> => {
-	const hasFile = data.photo != null;
-	if (hasFile) {
-		const formData = new FormData();
-		if (data.title !== undefined) formData.append("title", data.title);
-		if (data.description != null)
-			formData.append("description", data.description);
-		if (data.price !== undefined && data.price !== null)
-			formData.append("price", String(data.price));
-		if (data.url != null) formData.append("url", data.url);
-		if (data.photo) formData.append("photo", data.photo);
-		return client.patch(`/wishes/${id}`, formData).then((r) => r.data);
-	}
-	return client.patch(`/wishes/${id}`, data).then((r) => r.data);
+	const formData = new FormData();
+	if (data.title !== undefined) formData.append("title", data.title);
+	if (data.description != null)
+		formData.append("description", data.description);
+	if (data.price !== undefined && data.price !== null)
+		formData.append("price", String(data.price));
+	if (data.url != null) formData.append("url", data.url);
+	if (data.photo != null) formData.append("photo", data.photo);
+	return client.patch(`/wishes/${id}`, formData).then((r) => r.data);
 };
 
 export const handleWishComplete = (
