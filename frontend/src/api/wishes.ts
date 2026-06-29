@@ -21,6 +21,8 @@ export const updateWish = (
 	id: number,
 	data: WishUpdatePayload,
 ): Promise<Wish> => {
+	// Debug log to see payload being sent
+	console.log('updateWish called', { id, data });
 	const formData = new FormData();
 	if (data.title !== undefined) formData.append("title", data.title);
 	if (data.description != null)

@@ -13,6 +13,7 @@ from src.database import engine, Base
 
 app = FastAPI()
 
+# Use the directory from env if provided, otherwise default to ./backend/src/uploads
 DEFAULT_UPLOADS_DIR = str(Path(__file__).parent / "uploads")
 UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", DEFAULT_UPLOADS_DIR))
 app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")

@@ -12,11 +12,19 @@ from src.database import get_db
 from src.models import Wish, Reaction
 from src.schemas.wishes import WishResponse, CompleteWishRequest, WishUpdate
 from src.auth import get_current_user
+from src.config import config
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_UPLOADS_PATH = str(Path(__file__).parent.parent / "uploads")
-UPLOAD_BASE_DIR = Path(os.getenv("UPLOADS_DIR", DEFAULT_UPLOADS_PATH))
+
+c_d = config.get("UPLOADS_DIR")
+if c_d:
+    UPLOADS_DIR = Path(c_d)
+else:
+    c_d = DEFAULT_UPLOADS_PATH
+
+UPLOAD_BASE_DIR = Path(c_d)
 UPLOAD_DIR = UPLOAD_BASE_DIR / "wishes"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
