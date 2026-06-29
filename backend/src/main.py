@@ -1,5 +1,4 @@
 from collections import defaultdict, deque
-import os
 import time
 from pathlib import Path
 
@@ -10,12 +9,19 @@ from fastapi.staticfiles import StaticFiles
 
 from src.routers import invites, wishes, wishlists, todos, reactions
 from src.database import engine, Base
+from src.config import config
 
 app = FastAPI()
 
+
 # Use the directory from env if provided, otherwise default to ./backend/src/uploads
 DEFAULT_UPLOADS_DIR = str(Path(__file__).parent / "uploads")
-UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", DEFAULT_UPLOADS_DIR))
+ENV_UPLOADS_DIR = config.get("UPLOADS_DIR")
+if ENV_UPLOADS_DIR:
+    UPLOADS_DIR = Path(ENV_UPLOADS_DIR)
+else:
+    UPLOADS_DIR = Path(DEFAULT_UPLOADS_DIR)
+
 app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
 app.add_middleware(

@@ -130,6 +130,7 @@ async def update_wish(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
+    print(photo)
     wish = _get_wish(wish_id, db)
     if not _check_access(current_user, wish):
         raise HTTPException(status_code=FORBIDDEN_STATUS, detail=NO_ACCESS_MSG)
