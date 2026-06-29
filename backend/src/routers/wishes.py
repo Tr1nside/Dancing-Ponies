@@ -1,12 +1,11 @@
 import logging
-import os
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from pathlib import Path
 from uuid import uuid4
 from io import BytesIO
 
-from PIL import Image
+from PIL import Image, ImageOps
 
 from src.database import get_db
 from src.models import Wish, Reaction
@@ -54,6 +53,7 @@ def _process_image(photo: UploadFile) -> str:
         raise HTTPException(status_code=400, detail="Empty image file")
     image = Image.open(BytesIO(image_data))
     image.load()  # force read to catch corrupt images early
+    image = ImageOps.exif_transpose(image)
     width, height = image.size
     if width > MAX_IMAGE_SIZE or height > MAX_IMAGE_SIZE:
         if width < height:
