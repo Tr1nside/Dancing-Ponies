@@ -27,7 +27,6 @@ UPLOAD_BASE_DIR = Path(c_d)
 UPLOAD_DIR = UPLOAD_BASE_DIR / "wishes"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
-print(f"[wishes] UPLOAD_DIR = {UPLOAD_DIR.resolve()}")
 
 MAX_IMAGE_SIZE = 550
 NOT_FOUND_STATUS = 404
@@ -130,7 +129,6 @@ async def update_wish(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    print(photo)
     wish = _get_wish(wish_id, db)
     if not _check_access(current_user, wish):
         raise HTTPException(status_code=FORBIDDEN_STATUS, detail=NO_ACCESS_MSG)
@@ -147,8 +145,6 @@ async def update_wish(
         for k, v in update_data.model_dump(exclude_unset=True).items()
         if v is not None
     }
-    print(update_data)
-    print(fields_to_update)
     for field_name, field_value in fields_to_update.items():
         setattr(wish, field_name, field_value)
 
